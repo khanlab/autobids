@@ -1,0 +1,89 @@
+#!/bin/bash
+
+if [ "$#" -lt 1 ]
+then
+	echo "Usage $0 <in tar file(s)>"
+	exit 1
+fi
+
+in_tar=$1
+study_cfg=`$AUTOBIDS_DIR/getStudyCfg $in_tar`
+in_folder=`realpath $in_tar`
+in_folder=${in_folder%/*}
+
+if [ ! $? = 0 ]
+then
+ echo "ERROR in $0"
+ exit 1
+fi
+
+#if multiple tar files, make sure all point to same study cfg
+if [ "$#" -gt 1 ]
+then
+	shift 1
+	for tar in $@
+	do
+		cfg=`$AUTOBIDS_DIR/getStudyCfg $tar`
+		if [ ! "$cfg" = "$study_cfg" ]
+		then
+			echo "ERROR in $0, study_cfg not same for all tar files"
+			echo "$cfg != $study_cfg"
+			exit 1
+		fi
+		
+		#add check to make sure tars are coming from same folder (in_folder)
+
+		in_tar="$in_tar $tar"
+	done
+	single_subj=0
+else
+	single_subj=1
+fi
+
+source $study_cfg
+
+#add checks here to ensure all required variables are set:
+#BIDS_DIR
+#SUBJ_EXPR
+#HEURISTIC
+
+echo in_tar $in_tar
+
+log_dir=$AUTOBIDS_DIR/var/log
+mkdir -p $log_dir
+
+subjlist=$log_dir/subjects_$RANDOM
+
+for tar in $in_tar
+do
+	filename=${tar##*/}
+	folder=${tar%/*}
+
+	subjid=`$AUTOBIDS_DIR/getSubjID $SUBJ_EXPR $filename`
+	if [ ! $? = 0 ]
+	then
+		echo ERROR in $0: no matching subjid in tar
+		echo tar: $tar study_cfg: $study_cfg
+		echo $subjid
+	fi
+
+	#compile subjid list
+	echo $subjid >> $subjlist
+done
+
+echo subject list:
+cat $subjlist
+
+pushd $log_dir
+job_dcm2bids=$(neurogliaBatch heudiconv $subjlist -b "-b -d $in_folder/${SUBJ_EXPR} -o $BIDS_DIR -f $HEURISTIC -s" -j ShortSkinny )
+
+#job_corrbids, -d afterok:$job_dcm2bids -g -j ShortSkinny
+
+#job_bidsvalidate, -d afterok:$job_corrbids -g 
+#  have it e-mail the validator output?
+
+#runscript_bids-apps (pass it BIDS_DIR and the $job_bidsvalidate, it will run neurogliaBatch/BatchBIDS itself)
+
+popd
+
+#

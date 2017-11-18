@@ -1,0 +1,6 @@
+#!/bin/bash
+
+BIDS_DIR=~/test_bids_snsx
+SUBJ_EXPR=*_{subject}.*  #search string in tar file
+HEURISTIC=$AUTOBIDS_DIR/heuristics/dbs_7T.py
+

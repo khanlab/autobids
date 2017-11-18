@@ -1,0 +1,10 @@
+#!/bin/bash
+
+BIDS_DIR=~/datasets-bids/topsy_test
+#SUBJ_EXPR=*.TOPSY.{subject}.*.*  #search string inside tar
+SUBJ_EXPR=*TOPSY_{subject}.*  #search string inside tar
+HEURISTIC=$AUTOBIDS_DIR/heuristics/topsy_7T.py
+
+
+
+

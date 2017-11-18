@@ -1,0 +1,56 @@
+#!/bin/bash
+
+AUTOBIDS_DIR=~/autobids
+if [ "$#" -lt 1 ]
+then
+	echo "Locates matching study cfg file, give file or folder formatted as PI_Study_Date_PatientName.*"
+	echo "Usage: $0 <input file/folder>"
+	exit 1
+fi
+
+#env var:
+autobids_cfg=$AUTOBIDS_DIR/study_cfg
+
+#input is a tar file from dicom server
+in=$1
+in_dir=`realpath $in`
+in_dir=${in_dir%/*}
+
+
+in=${in##*/}
+
+
+pi=`echo $in | awk  -F '_' '{print $1}'`
+study=`echo $in | awk  -F '_' '{print $2}'`
+date=`echo $in | awk  -F '_' '{print $3}'`
+
+patient=${in#*_*_*_}
+patient=${patient%%.*}
+
+#echo $pi $study $date $patient
+
+autocfg=$autobids_cfg/${pi}_${study}
+
+#pick the matching cfg file
+for cfg in `ls $autobids_cfg/${pi}_${study}*`
+do
+#	echo cfg: $cfg
+	#look for the .<tag> substring in the patient name for a match
+	tag=${cfg##*.}
+#	echo tag: $tag
+	ismatch=`echo $patient | grep -i ${tag}`
+	if [ -n "$ismatch" ]
+	then
+#		echo $cfg is a match with $patient!
+		autocfg=$cfg
+		continue
+	fi	
+done
+if [ ! -e $autocfg ]
+then
+	echo "ERROR in $0: config not found, $autocfg"
+	exit 1
+fi
+
+echo $autocfg
+exit 0
