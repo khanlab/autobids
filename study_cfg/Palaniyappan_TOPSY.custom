@@ -1,0 +1,13 @@
+#!/bin/bash
+
+BIDS_DIR=~/datasets-bids/topsy_test
+
+SUBJ_EXPR=*.TOPSY.{subject}.*.*  #search string inside tar (from student HD)
+#SUBJ_EXPR=*TOPSY_{subject}.*  #search string inside tar
+
+
+HEURISTIC=$AUTOBIDS_DIR/heuristics/topsy_7T.py
+PRE_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/prebids_topsy_7T
+
+
+EMAIL_NOTIFICATION=alik@robarts.ca

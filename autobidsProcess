@@ -2,9 +2,54 @@
 
 if [ "$#" -lt 1 ]
 then
-	echo "Usage $0 <in tar file(s)>"
+
+	echo "Usage $0 <options> <in tar file(s)>"
+	echo ""
+	echo " Optional arguments:"
+	echo "  -c <study_cfg>: Specify study cfg (instead of looking up by tar name)"
+	echo "  -k: Keep tar files in original folder (default: move tar files to BIDS/sourcedata)"
 	exit 1
+
+	#option for specifying study_cfg
 fi
+
+testmode=0
+study_cfg=""
+nomove_tar=0
+while getopts "c:tk" options; do
+ case $options in
+    k ) echo "	Keeping tar files in original folder" >&2
+	nomove_tar=1;;
+    t ) echo "	Using test-mode (no submit jobs)" >&2
+	testmode=1;;
+    c ) echo "  Using custom study_cfg: $OPTARG" >&2
+	study_cfg=$OPTARG;;
+    * ) usage
+	exit 1;;
+ esac
+done
+
+shift $((OPTIND-1))
+
+if [ "$#" -gt 1 ]
+then
+	single_subj=0
+else
+	single_subj=1
+fi
+
+
+if [ -n "$study_cfg" ]
+then
+	if [ ! -e $study_cfg ]
+	then
+		echo "ERROR in $0: study_cfg $study_cfg does not exist!"
+		exit 1
+	fi
+	in_tar=$@
+else
+
+#if study_cfg not specified, then look it up, and make sure it is the same for all tar files..
 
 in_tar=$1
 study_cfg=`$AUTOBIDS_DIR/getStudyCfg $in_tar`
@@ -35,29 +80,77 @@ then
 
 		in_tar="$in_tar $tar"
 	done
-	single_subj=0
-else
-	single_subj=1
-fi
+
+fi #if multiple tars
+
+fi #if study_cfg defined..
 
 source $study_cfg
-
 #add checks here to ensure all required variables are set:
-#BIDS_DIR
-#SUBJ_EXPR
-#HEURISTIC
+if [ ! -n $BIDS_DIR ]
+then
+	echo ERROR in $0: BIDS_DIR not defined in $study_cfg
+	exit 1
+fi
 
-echo in_tar $in_tar
+if [ ! -n $SUBJ_EXPR ]
+then
+	echo ERROR in $0: SUBJ_EXPR not defined in $study_cfg
+	exit 1
+fi
+if [ -n $HEURISTIC ]
+then
+	if [ ! -e $HEURISTIC ]
+	then
+		echo ERROR in $0:  $HEURISTIC not found
+		exit 1
+	fi
+else
+	echo ERROR in $0: HEURISTIC not defined in $study_cfg
+	exit 1
+fi
 
-log_dir=$AUTOBIDS_DIR/var/log
+#optional: POST_BIDS_SCRIPT, EMAIL_NOTIFICATION
+if [ -n $POST_BIDS_SCRIPT ]
+then
+	if [ ! -e $POST_BIDS_SCRIPTS ]
+	then
+		echo ERROR in $0: $POST_BIDS_SCRIPTS not found
+		exit 1
+	fi
+fi
+
+echo ""
+echo "BIDS_DIR: $BIDS_DIR"
+echo ""
+
+
+
+if [ "$single_subj" = "0" -a -e $BIDS_DIR ]
+then
+ echo "Processing multiple subjects into an existing BIDS_DIR"
+ #maybe add an exception later..
+fi
+
+
+sourcedata=$BIDS_DIR/sourcedata
+log_dir=$sourcedata/autobids_`date +%Y-%m-%d_%H.%M.%S`
 mkdir -p $log_dir
 
-subjlist=$log_dir/subjects_$RANDOM
+subjlist=$log_dir/subjects
+validator_out=$log_dir/validator.out
 
 for tar in $in_tar
 do
 	filename=${tar##*/}
 	folder=${tar%/*}
+
+	if [ ! -e $tar ]
+	then
+		echo "ERROR in $0: tarfile does not exist"
+		echo $tar
+		exit 1
+	fi
 
 	subjid=`$AUTOBIDS_DIR/getSubjID $SUBJ_EXPR $filename`
 	if [ ! $? = 0 ]
@@ -65,25 +158,64 @@ do
 		echo ERROR in $0: no matching subjid in tar
 		echo tar: $tar study_cfg: $study_cfg
 		echo $subjid
+		exit 1
+	fi
+
+	#move tar to source data
+	if [ $nomove_tar == 0 ]
+	then
+		mv -v $tar $sourcedata
+		tar_dir=$sourcedata
+	else
+		tar_dir=$folder
+	fi
+
+	if [ -e $BIDS_DIR/sub-$subjid ]
+	then	
+		echo "DELETING EXISTING FOLDER BEFORE OVERWRITING: $BIDS_DIR/sub-$subjid"
+		rm -rf $BIDS_DIR/sub-$subjid
+		rm -rf $BIDS_DIR/.heudiconv/$subjid
 	fi
 
 	#compile subjid list
 	echo $subjid >> $subjlist
 done
 
-echo subject list:
-cat $subjlist
 
-pushd $log_dir
-job_dcm2bids=$(neurogliaBatch heudiconv $subjlist -b "-b -d $in_folder/${SUBJ_EXPR} -o $BIDS_DIR -f $HEURISTIC -s" -j ShortSkinny )
+pushd $log_dir > /dev/null
 
-#job_corrbids, -d afterok:$job_dcm2bids -g -j ShortSkinny
 
-#job_bidsvalidate, -d afterok:$job_corrbids -g 
-#  have it e-mail the validator output?
+#heudiconv is always run:
+job_dcm2bids=$(neurogliaBatch heudiconv $subjlist -b "--overwrite -b -d $tar_dir/${SUBJ_EXPR} -o $BIDS_DIR -f $HEURISTIC -s" -j ShortSkinny )
 
-#runscript_bids-apps (pass it BIDS_DIR and the $job_bidsvalidate, it will run neurogliaBatch/BatchBIDS itself)
 
-popd
+#prebids pipeline (to create a "more" valid bids dataset) is optional:
+if [ -n "$PRE_BIDS_PIPELINE" ] #run the pipeline referred to in study_cfg
+then
+job_prebids=$($PRE_BIDS_PIPELINE $BIDS_DIR $subjlist afterok:$job_dcm2bids)
+else
+job_prebids=$job_dcm2bids
+fi
 
-#
+#bids-validator is always run:
+job_validator=$(neurogliaSubmit -j ShortSkinny -d afterok:$job_prebids bids-validator $BIDS_DIR \> $validator_out )
+
+#postbids pipeline (to run on validated bids datasets) is optional:
+if [ -n "$POST_BIDS_PIPELINE" ]
+then
+job_postbids=$($POST_BIDS_PIPELINE $BIDS_DIR $subjlist afterok:$job_prebids )
+else
+job_postbids=$job_prebids #carry over dependencies
+fi
+
+
+
+#send e-mail notification with bids-validator output -- doesn't work to mail from the compute node (only login nodes) -- Boo..
+#if [ -n "$EMAIL_NOTIFICATION" ]
+#then
+#$AUTOBIDS_DIR/emailLog -s "bids validator" -d afterok:$job_validator $EMAIL_NOTIFICATION $validator_out
+#fi
+
+popd > /dev/null
+
+exit 0
