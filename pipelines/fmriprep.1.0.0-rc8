@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#pipeline for running fmriprep
+
+bids_dir=$1  		#path to bids dir
+subjlist=$2		#list of (new) subject IDs to process, where ID is from sub-ID
+depends=$3		#job dependencies
+
+if [ "$#" -lt 3 ]
+then
+  echo "Usage: $0 <bids> <subjlist> <depends>"
+  exit 0
+fi
+
+
+jobid=$(bidsBatch -d $depends -S $subjlist fmriprep 1.0.0-rc8 $bids_dir $bids_dir/derivatives/fmriprep participant)
+
+
+
+echo $jobid
+
+exit 0

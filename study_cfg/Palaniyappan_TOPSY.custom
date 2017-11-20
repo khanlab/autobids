@@ -7,7 +7,8 @@ SUBJ_EXPR=*.TOPSY.{subject}.*.*  #search string inside tar (from student HD)
 
 
 HEURISTIC=$AUTOBIDS_DIR/heuristics/topsy_7T.py
-PRE_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/prebids_topsy_7T
-
+PRE_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/tuneup_bids
+POST_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/fmriprep.1.0.0-rc8
 
 EMAIL_NOTIFICATION=alik@robarts.ca
+

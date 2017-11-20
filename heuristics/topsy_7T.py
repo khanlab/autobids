@@ -17,14 +17,14 @@ def infotodict(seqinfo):
     """
     t1 = create_key('sub-{subject}/anat/sub-{subject}_acq-MP2RAGE_T1w')
     t1map = create_key('sub-{subject}/anat/sub-{subject}_acq-MP2RAGE_T1map')
-    t1inv1 = create_key('sub-{subject}/anat/sub-{subject}_acq-inv1_MP2RAGE')
-    t1inv2 = create_key('sub-{subject}/anat/sub-{subject}_acq-inv2_MP2RAGE')
-    t1uni = create_key('sub-{subject}/anat/sub-{subject}_acq-uni_MP2RAGE')
+    t1inv1 = create_key('sub-{subject}/anat/sub-{subject}_inv-1_MP2RAGE')
+    t1inv2 = create_key('sub-{subject}/anat/sub-{subject}_inv-2_MP2RAGE')
+    t1uni = create_key('sub-{subject}/anat/sub-{subject}_acq-UNI_MP2RAGE')
 
-    b1map = create_key('sub-{subject}/anat/sub-{subject}_acq-Sa2RAGE_B1map')
-    b1inv1 = create_key('sub-{subject}/anat/sub-{subject}_acq-inv1_Sa2RAGE')
-    b1inv2 = create_key('sub-{subject}/anat/sub-{subject}_acq-inv2_Sa2RAGE')
-    b1div = create_key('sub-{subject}/anat/sub-{subject}_acq-b1Div_Sa2RAGE')
+    b1map = create_key('sub-{subject}/fmap/sub-{subject}_acq-b1map_SA2RAGE')
+    b1inv1 = create_key('sub-{subject}/fmap/sub-{subject}_inv-1_SA2RAGE')
+    b1inv2 = create_key('sub-{subject}/fmap/sub-{subject}_inv-2_SA2RAGE')
+    b1div = create_key('sub-{subject}/fmap/sub-{subject}_acq-b1Div_SA2RAGE')
 
     t2 = create_key('sub-{subject}/anat/sub-{subject}_acq-tse2D_T2w')
     rest = create_key('sub-{subject}/func/sub-{subject}_task-rest_bold')
@@ -33,7 +33,9 @@ def infotodict(seqinfo):
     dwi_PA_sbref = create_key('sub-{subject}/dwi/sub-{subject}_acq-PA_sbref')
     dwi_AP = create_key('sub-{subject}/dwi/sub-{subject}_acq-AP_dwi')
     dwi_AP_sbref = create_key('sub-{subject}/dwi/sub-{subject}_acq-AP_sbref')
+
     fmap_PA = create_key('sub-{subject}/fmap/sub-{subject}_acq-PA_epi')
+    fmap_PA_sbref = create_key('sub-{subject}/fmap/sub-{subject}_acq-PA_sbref')
     fmap_diff = create_key('sub-{subject}/fmap/sub-{subject}_phasediff')
     fmap_magnitude = create_key('sub-{subject}/fmap/sub-{subject}_magnitude')
 
@@ -41,7 +43,7 @@ def infotodict(seqinfo):
 		b1map:[],b1inv1:[],b1inv2:[],b1div:[],
 		t2:[],rest:[],rest_sbref:[],
 		dwi_PA:[],dwi_AP:[],dwi_PA_sbref:[],dwi_AP_sbref:[],
-		fmap_PA:[],fmap_diff:[],fmap_magnitude:[]}
+                fmap_PA:[],fmap_PA_sbref:[],fmap_diff:[],fmap_magnitude:[]}
 
     for idx, s in enumerate(seqinfo):
         #mp2rage
@@ -75,14 +77,19 @@ def infotodict(seqinfo):
 	    
         #rs func (incl opp phase enc)
         if ('bold' in s.protocol_name):
-            if (s.dim4 >1 and 'AP_rs' in (s.series_description).strip()):
-                info[rest].append({'item': s.series_id})
-            if (s.dim4 ==1 and 'AP_rs' in (s.series_description).strip() and 'SBRef' in (s.series_description).strip() ):
-		info[rest_sbref].append({'item': s.series_id})
-            if (s.dim4 ==1 and 'PA' in (s.series_description).strip() and 'ND' in s.image_type[3].strip()):
-		info[fmap_PA].append({'item': s.series_id})
+            if ('AP_rs' in (s.series_description).strip()):
+                if (s.dim4==1 and  'SBRef' in (s.series_description).strip()):
+                    info[rest_sbref].append({'item': s.series_id})
+                else:
+                    info[rest].append({'item': s.series_id})
+                    
+            if ('PA' in (s.series_description).strip()):
+                if (s.dim4==1 and  'SBRef' in (s.series_description).strip()):
+                    info[fmap_PA_sbref].append({'item': s.series_id})
+                else:
+                    info[fmap_PA].append({'item': s.series_id})
 
-	#gre field map   
+        #gre field map   
         if ('field_mapping' in s.protocol_name):   
             if (s.dim4 == 1) and ('gre_field_mapping' == (s.series_description).strip()):
                 if('P' in (s.image_type[2].strip()) ):
