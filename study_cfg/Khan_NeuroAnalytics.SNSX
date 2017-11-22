@@ -1,0 +1,12 @@
+#!/bin/bash
+
+BIDS_DIR=$AUTOBIDS_DATA/Khan/SNSX_7T
+SUBJ_EXPR=*_{subject}_?.*.tgz  #search string in tar file
+
+HEURISTIC=$AUTOBIDS_DIR/heuristics/snsx_7T.py
+
+PRE_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/tuneup_bids_snsx
+#POST_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/fmriprep.1.0.0-rc8
+
+
+EMAIL_NOTIFICATION=alik@robarts.ca

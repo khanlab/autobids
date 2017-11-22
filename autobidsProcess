@@ -68,7 +68,7 @@ then
 fi
 
 
-study_cfg=`$AUTOBIDS_DIR/getStudyCfg $in_tar`
+study_cfg=`$AUTOBIDS_DIR/etc/getStudyCfg $in_tar`
 in_folder=`realpath $in_tar`
 in_folder=${in_folder%/*}
 
@@ -93,7 +93,7 @@ then
 		fi
 
 
-		cfg=`$AUTOBIDS_DIR/getStudyCfg $tar`
+		cfg=`$AUTOBIDS_DIR/etc/getStudyCfg $tar`
 		if [ ! "$cfg" = "$study_cfg" ]
 		then
 			echo "ERROR in $0, study_cfg not same for all tar files"
@@ -111,6 +111,8 @@ fi #if multiple tars
 fi #if study_cfg defined..
 
 source $study_cfg
+
+
 #add checks here to ensure all required variables are set:
 if [ ! -n $BIDS_DIR ]
 then
@@ -170,7 +172,7 @@ do
 	folder=${tar%/*}
 
 
-	subjid=`$AUTOBIDS_DIR/getSubjID $SUBJ_EXPR $filename`
+	subjid=`$AUTOBIDS_DIR/etc/getSubjID $SUBJ_EXPR $filename`
 	if [ ! $? = 0 ]
 	then
 		echo ERROR in $0: no matching subjid in tar
@@ -235,7 +237,7 @@ job_postbids=$job_prebids #carry over dependencies
 fi
 
 #run bids-validator,  but wait for it to finish to send a confirmation e-mail (depends on heudiconv and prebids finishing)
-job_validator=$(neurogliaSubmit -j ShortSkinny -d afterok:$job_prebids bids-validator $BIDS_DIR \> $validator_out )
+job_validator=$(neurogliaSubmit -j ShortSkinny -d afterok:$job_prebids bids-validator $BIDS_DIR --verbose \> $validator_out )
 
 
 
