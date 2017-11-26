@@ -1,6 +1,5 @@
 #!/bin/bash
 
-AUTOBIDS_DIR=~/autobids
 if [ "$#" -lt 1 ]
 then
 	echo "Locates matching study cfg file, give file or folder formatted as PI_Study_Date_PatientName.*"
@@ -9,7 +8,7 @@ then
 fi
 
 #env var:
-autobids_cfg=$AUTOBIDS_DIR/study_cfg
+autobids_cfg=$AUTOBIDS_DIR/cfg/study
 
 #input is a tar file from dicom server
 in=$1

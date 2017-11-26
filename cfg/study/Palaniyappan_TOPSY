@@ -2,11 +2,11 @@
 
 BIDS_DIR=$AUTOBIDS_DATA/Palaniyappan/TOPSY_7T
 
-SUBJ_EXPR=*.TOPSY.{subject}.*.*  #search string inside tar (from student HD)
-#SUBJ_EXPR=*TOPSY_{subject}.*  #search string inside tar
+SUBJ_EXPR=*TOPSY_{subject}  #search string inside tar (from student HD)
+#SUBJ_EXPR=*.TOPSY.{subject}.*.*  #search string inside tar (from student HD)
 
 
-HEURISTIC=$AUTOBIDS_DIR/heuristics/topsy_7T.py
+HEURISTIC=$AUTOBIDS_DIR/cfg/heuristics/topsy_7T.py
 PRE_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/tuneup_bids
 POST_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/fmriprep.1.0.0-rc8
 

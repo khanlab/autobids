@@ -90,7 +90,9 @@ def infotodict(seqinfo):
 	DIS3D_phase_echo_GRE = create_key(dc_dir+'/sub-{subject}/anat/sub-{subject}_part-phase_rec-DIS3D_echo_GRE')
 
 	#Derived T2 star - seem to only be calculated with DIS2D
+	T2_star = create_key('sub-{subject}/anat/sub-{subject}_T2star')
 	DIS2D_T2_star = create_key(dc_dir+'/sub-{subject}/anat/sub-{subject}_rec-DIS2D_T2star')
+	DIS3D_T2_star = create_key(dc_dir+'/sub-{subject}/anat/sub-{subject}_rec-DIS3D_T2star')
 
 
 	#########################
@@ -154,7 +156,9 @@ def infotodict(seqinfo):
 			DIS3D_mag_echo_GRE:[],
 			DIS3D_phase_echo_GRE:[],
 
+			T2_star:[],
 			DIS2D_T2_star:[],
+			DIS3D_T2_star:[],
 
 
 			AP_dwi:[],  PA_b0_dwi:[],

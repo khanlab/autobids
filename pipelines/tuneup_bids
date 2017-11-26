@@ -3,7 +3,7 @@
 #pipeline to correct json files in field maps, and clean participants.tsv (sort, remove 4th column)
 
 bids_dir=$1  		#path to bids dir
-subjlist=$2		#list of (new) subject IDs to process, where ID is from sub-ID
+subjlist=$2		#list of (new) subject IDs to process, where ID is from sub-ID1
 depends=$3		#job dependencies
 
 jobid_fmap=$(neurogliaSubmit -d $depends -j ShortSkinny $AUTOBIDS_DIR/etc/correctFieldMap $bids_dir $subjlist )

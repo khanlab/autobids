@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Line below locks the script so cannot be run simultaneously (i.e. to prevent conflicts)
+[ "${FLOCKER}" != "$0" ] && exec env FLOCKER="$0" flock -en "$0" "$0" "$@" || :
+
+if [ "$#" -lt 1 ]
+then
+    dates=$(date +'%Y%m%d')
+else
+    dates=$@
+fi
+
+
+
+for date in $dates
+do
+
+scratch_dir=/scratch/$USER/incoming_$RANDOM
+
+#download tarballs for all studies
+for study in `$AUTOBIDS_DIR/etc/getListStudies`
+do
+ 
+ echo Retrieving dicoms for ${study}* on ${date}...
+ getDicomTarballs -s \'${study}*\' -d \'${date}\' -o $scratch_dir
+
+done
+
+#process each individually
+count=`ls -1 $scratch_dir/*.tgz 2> /dev/null  | wc -l `
+if [ "$count" -gt 1 ]
+then
+for tgz in `ls $scratch_dir/*.tgz`
+do
+  tgz_name=${tgz##*/}
+  if [ ! $(grep ${tgz_name} $AUTOBIDS_DIR/var/downloaded_tgz.dat) ]
+  then
+	echo $tgz_name >> $AUTOBIDS_DIR/var/downloaded_tgz.dat
+	autobidsProcess $tgz
+  fi
+
+done
+fi
+
+done

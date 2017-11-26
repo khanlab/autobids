@@ -2,13 +2,13 @@
 
 
 function usage {
+	echo "Runs dcm2bids, pre-bids, and post-bids pipelines on tar files(s)"
 	echo "Usage $0 <options> <in tar file(s)>"
 	echo ""
 	echo " Optional arguments:"
 	echo "  -c <study_cfg>: Specify study cfg (default: looks up study_cfg using tar name)"
 	echo "  -k: Keep tar files in original folder (default: move tar files to BIDS/sourcedata)"
-	echo "  -S: Override SUBJ_EXPR - note must include {subject} (default: uses study_cfg definition)"
-	echo "  -B: Override BIDS_DIR  (default: uses study_cfg definition)"
+	echo "  -f <subj_expr>: Override {subject} to search within tar filename (default: uses SUBJ_EXPR in study_cfg to search within patient_name)"
 }
 	#option for specifying study_cfg
 
@@ -21,16 +21,22 @@ fi
 testmode=0
 study_cfg=""
 nomove_tar=0
+is_custom_cfg=0
+simplesubjid=0
+TAR_SUBJ_EXPR=
 
 opts="" #options for neuroglia/etc tools
 
-while getopts "c:tk" options; do
+while getopts "c:tkf:" options; do
  case $options in
     k ) echo "	Keeping tar files in original folder" >&2
 	nomove_tar=1;;
     t ) echo "	Using test-mode (no submit jobs)" >&2
 	testmode=1;;
+    f ) echo "	Overriding SUBJ_EXPR for tar filename: $OPTARG" >&2
+	TAR_SUBJ_EXPR=$OPTARG;;
     c ) echo "  Using custom study_cfg: $OPTARG" >&2
+	is_custom_cfg=1
 	study_cfg=$OPTARG;;
     * ) usage
 	exit 1;;
@@ -69,14 +75,15 @@ fi
 
 
 study_cfg=`$AUTOBIDS_DIR/etc/getStudyCfg $in_tar`
-in_folder=`realpath $in_tar`
-in_folder=${in_folder%/*}
-
 if [ ! $? = 0 ]
 then
  echo "ERROR in $0"
  exit 1
 fi
+
+in_folder=`realpath $in_tar`
+in_folder=${in_folder%/*}
+
 
 
 #if multiple tar files, make sure all point to same study cfg
@@ -110,6 +117,12 @@ fi #if multiple tars
 
 fi #if study_cfg defined..
 
+if [ ! -e $study_cfg ]
+then
+	echo "ERROR: Study_cfg not defined for $in_tar" 
+	exit 1
+fi
+
 source $study_cfg
 
 
@@ -137,7 +150,18 @@ else
 	exit 1
 fi
 
-#optional: POST_BIDS_SCRIPT, EMAIL_NOTIFICATION
+#optional: PRE_BIDS_SCRIPT
+if [ -n $PRE_BIDS_SCRIPT ]
+then
+	if [ ! -e $PRE_BIDS_SCRIPTS ]
+	then
+		echo ERROR in $0: $PRE_BIDS_SCRIPTS not found
+		exit 1
+	fi
+fi
+
+
+#optional: POST_BIDS_SCRIPT
 if [ -n $POST_BIDS_SCRIPT ]
 then
 	if [ ! -e $POST_BIDS_SCRIPTS ]
@@ -172,7 +196,26 @@ do
 	folder=${tar%/*}
 
 
-	subjid=`$AUTOBIDS_DIR/etc/getSubjID $SUBJ_EXPR $filename`
+	if [ -n "$TAR_SUBJ_EXPR" ]
+	then
+		echo $AUTOBIDS_DIR/etc/getSubjID $TAR_SUBJ_EXPR $filename
+		subjid=`$AUTOBIDS_DIR/etc/getSubjID $TAR_SUBJ_EXPR $filename`
+	else
+
+		pi=`echo $filename | awk  -F '_' '{print $1}'`
+		study=`echo $filename| awk  -F '_' '{print $2}'`
+		date=`echo $filename | awk  -F '_' '{print $3}'`
+		suffix=${filename##*_}
+	
+		#strip off <STUDY_DESC>_<DATE>_ from front
+  	     	 #and _?.<HASH>.tgz from back
+		patient_name=${filename#${pi}_${study}_${date}}
+		patient_name=${patient_name%_${suffix}}
+
+		echo $AUTOBIDS_DIR/etc/getSubjID $SUBJ_EXPR $patient_name
+		subjid=`$AUTOBIDS_DIR/etc/getSubjID $SUBJ_EXPR $patient_name`
+	fi
+
 	if [ ! $? = 0 ]
 	then
 		echo ERROR in $0: no matching subjid in tar
@@ -180,6 +223,7 @@ do
 		echo $subjid
 		exit 1
 	fi
+
 
 	#move tar to source data
 	if [ $nomove_tar = 0 -o $testmode = 1 ]
@@ -190,12 +234,6 @@ do
 		tar_dir=$folder
 	fi
 
-#	if [ -e $BIDS_DIR/sub-$subjid -a $testmode = 0 ]
-#	then	
-#		echo "DELETING EXISTING FOLDER BEFORE OVERWRITING: $BIDS_DIR/sub-$subjid"
-#		rm -rf $BIDS_DIR/sub-$subjid
-#		rm -rf $BIDS_DIR/.heudiconv/$subjid
-#	fi
 
 	#compile subjid list
 	echo $subjid >> $subjlist
@@ -210,34 +248,42 @@ then
 fi
 
 #heudiconv is always run:
-job_dcm2bids=$(neurogliaBatch $opts heudiconv $subjlist -b "--overwrite -b -d $tar_dir/${SUBJ_EXPR} -o $BIDS_DIR -f $HEURISTIC -s" -j 2core8gb )
+DCM2BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/dcm2bids
 
+#expression for heudiconv
+if [ -n "$TAR_SUBJ_EXPR" ]
+then
+dicom_expr=$tar_dir/${TAR_SUBJ_EXPR}
+else
+dicom_expr=$tar_dir/${pi}_${study}_${date}_${SUBJ_EXPR}_${suffix}
+fi
 
-#testmode currently doesn't work for pre/post pipelines, need to pass that on to them..
+job_dcm2bids=$($DCM2BIDS_PIPELINE $BIDS_DIR $subjlist -f $HEURISTIC -d $dicom_expr )
+
 
 #prebids pipeline (to create a "more" valid bids dataset) is optional:
 if [ -n "$PRE_BIDS_PIPELINE" ] #run the pipeline referred to in study_cfg
 then
+echo $PRE_BIDS_PIPELINE $BIDS_DIR $subjlist afterany:$job_dcm2bids
 job_prebids=$($PRE_BIDS_PIPELINE $BIDS_DIR $subjlist afterok:$job_dcm2bids)
 else
 job_prebids=$job_dcm2bids
 fi
 
+#run bids-validator,  but wait for it to finish to send a confirmation e-mail (depends on heudiconv and prebids finishing)
+echo neurogliaSubmit -j ShortSkinny -d afterany:$job_prebids bids-validator $BIDS_DIR --verbose \> $validator_out 
+job_validator=$(neurogliaSubmit  -j ShortSkinny -d afterok:$job_prebids bids-validator $BIDS_DIR --verbose \> $validator_out )
+
 
 #postbids pipeline (to run on validated bids datasets) is optional:
 if [ -n "$POST_BIDS_PIPELINE" ]
 then
-	echo submitting postbids pipeline
-echo $POST_BIDS_PIPELINE $BIDS_DIR $subjlist afterok:$job_prebids 
-job_postbids=$($POST_BIDS_PIPELINE $BIDS_DIR $subjlist afterok:$job_prebids )
-else
-	echo not submitting postbids pipeline
-echo $POST_BIDS_PIPELINE $BIDS_DIR $subjlist afterok:$job_prebids 
-job_postbids=$job_prebids #carry over dependencies
-fi
+#echo $POST_BIDS_PIPELINE $BIDS_DIR $subjlist afterok:$job_prebids 
+#job_postbids=$($POST_BIDS_PIPELINE $BIDS_DIR $subjlist afterok:$job_prebids )
 
-#run bids-validator,  but wait for it to finish to send a confirmation e-mail (depends on heudiconv and prebids finishing)
-job_validator=$(neurogliaSubmit -j ShortSkinny -d afterok:$job_prebids bids-validator $BIDS_DIR --verbose \> $validator_out )
+#submit a job that will submit the post-bids-pipeline when bids is ready.. (since bidsBatch requires the participants.tsv to exist at submission time)
+regularSubmit -j ShortSkinny -d afterany:$job_prebids  $POST_BIDS_PIPELINE $BIDS_DIR $subjlist 
+fi
 
 
 

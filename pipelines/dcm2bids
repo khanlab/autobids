@@ -1,0 +1,31 @@
+#!/bin/bash
+
+function usage {
+
+echo "Usage: $0 <bids> <subjlist>  -f <heuristic> -d <input_dicom_expr> "
+
+}
+
+if [ "$#" -lt 2 ]
+then
+	usage
+	exit 1
+fi
+
+bids_dir=$1
+subjlist=$2
+shift 2
+
+while getopts "f:d:" options; do
+ case $options in
+  f ) heuristic=$OPTARG;;
+  d ) input_string=$OPTARG;;
+  * ) usage
+      exit 1;;
+  esac
+done
+
+job_dcm2bids=$(neurogliaBatch  heudiconv $subjlist -b "--overwrite -b -d ${input_string} -o $bids_dir -f $heuristic -s" -j 2core8gb )
+
+echo $job_dcm2bids
+exit 0

@@ -15,8 +15,8 @@ in_name=$2
  aftersubj=${subj_expr##*\{subject\}}
 
 
- strippost=${in_name%%$aftersubj}
- strippre=${strippost##$beforesubj}
+ strippost=${in_name%$aftersubj}
+ strippre=${strippost#$beforesubj}
  subjid=$strippre
 
  if [ ! -n "$subjid" ]

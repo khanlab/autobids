@@ -6,9 +6,22 @@ bids_dir=$1  		#path to bids dir
 subjlist=$2		#list of (new) subject IDs to process, where ID is from sub-ID
 depends=$3		#job dependencies
 
-jobid_fmap=$(neurogliaSubmit -d $depends -j ShortSkinny $AUTOBIDS_DIR/etc/correctFieldMap $bids_dir $subjlist )
-jobid_multiecho=$(neurogliaSubmit -d $depends -j ShortSkinny $AUTOBIDS_DIR/etc/correctMultiEcho $bids_dir $subjlist )
-jobid_tsv=$(neurogliaSubmit -d afterok:$jobid_fmap:$jobid_multiecho -j ShortSkinny $AUTOBIDS_DIR/etc/cleanParticipantsFile $bids_dir )
+if [ "$#" -lt 1 ]
+then
+  echo "Usage: $0 <bids> <subjlist> <depends>"
+  exit 0
+fi
+
+opts=""
+if [ -n "$depends" ]
+then
+	opts="-d $depends $opts"
+fi
+
+
+jobid_fmap=$(neurogliaSubmit  -d $depends -j ShortSkinny $AUTOBIDS_DIR/etc/correctFieldMap $bids_dir $subjlist )
+jobid_multiecho=$(neurogliaSubmit  -d $depends -j ShortSkinny $AUTOBIDS_DIR/etc/correctMultiEcho $bids_dir $subjlist )
+jobid_tsv=$(neurogliaSubmit  -d afterok:$jobid_fmap:$jobid_multiecho -j ShortSkinny $AUTOBIDS_DIR/etc/cleanParticipantsFile $bids_dir )
 
 echo $jobid_tsv
 

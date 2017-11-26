@@ -1,0 +1,8 @@
+#!/bin/bash
+
+
+autobids_cfg=$AUTOBIDS_DIR/cfg/study
+
+pushd $autobids_cfg > /dev/null
+ls -d * | awk -F '_' '{print $1}' 
+popd $autobids_cfg > /dev/null
