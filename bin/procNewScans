@@ -22,21 +22,21 @@ for study in `$AUTOBIDS_DIR/etc/getListStudies`
 do
  
  echo Retrieving dicoms for ${study}* on ${date}...
- getDicomTarballs -s \'${study}*\' -d \'${date}\' -o $scratch_dir
+ getDicomTarballs \'${study}*\' \'${date}\' $scratch_dir
 
 done
 
 #process each individually
-count=`ls -1 $scratch_dir/*.tgz 2> /dev/null  | wc -l `
+count=`ls -1 $scratch_dir/*.tar 2> /dev/null  | wc -l `
 if [ "$count" -gt 1 ]
 then
-for tgz in `ls $scratch_dir/*.tgz`
+for tar in `ls $scratch_dir/*.tar`
 do
-  tgz_name=${tgz##*/}
-  if [ ! $(grep ${tgz_name} $AUTOBIDS_DIR/var/downloaded_tgz.dat) ]
+  tar_name=${tar##*/}
+  if [ ! $(grep ${tar_name} $AUTOBIDS_DIR/var/downloaded_tar.dat) ]
   then
-	echo $tgz_name >> $AUTOBIDS_DIR/var/downloaded_tgz.dat
-	autobidsProcess $tgz
+	echo $tar_name >> $AUTOBIDS_DIR/var/downloaded_tar.dat
+	autobidsProcess $tar
   fi
 
 done
