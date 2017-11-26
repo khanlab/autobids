@@ -138,17 +138,19 @@ then
 	echo ERROR in $0: SUBJ_EXPR not defined in $study_cfg
 	exit 1
 fi
-if [ -n $HEURISTIC ]
-then
-	if [ ! -e $HEURISTIC ]
-	then
-		echo ERROR in $0:  $HEURISTIC not found
-		exit 1
-	fi
-else
-	echo ERROR in $0: HEURISTIC not defined in $study_cfg
-	exit 1
-fi
+
+#HEURISTIC optional
+#if [ -n $HEURISTIC ]
+#then
+#	if [ ! -e $HEURISTIC ]
+#	then
+#		echo ERROR in $0:  $HEURISTIC not found
+#		exit 1
+#	fi
+#else
+#	echo ERROR in $0: HEURISTIC not defined in $study_cfg
+#	exit 1
+#fi
 
 #optional: PRE_BIDS_SCRIPT
 if [ -n $PRE_BIDS_SCRIPT ]
@@ -193,27 +195,28 @@ validator_out=$code_dir/bids-validator_`date +%Y-%m-%d_%H.%M`.txt
 for tar in $in_tar
 do
 	filename=${tar##*/}
-	folder=${tar%/*}
 
+	folder=`realpath $(dirname $tar)`
 
 	if [ -n "$TAR_SUBJ_EXPR" ]
 	then
-		echo $AUTOBIDS_DIR/etc/getSubjID $TAR_SUBJ_EXPR $filename
 		subjid=`$AUTOBIDS_DIR/etc/getSubjID $TAR_SUBJ_EXPR $filename`
+		echo "$filename -> $subjid"
 	else
 
 		pi=`echo $filename | awk  -F '_' '{print $1}'`
 		study=`echo $filename| awk  -F '_' '{print $2}'`
 		date=`echo $filename | awk  -F '_' '{print $3}'`
 		suffix=${filename##*_}
-	
+
+
 		#strip off <STUDY_DESC>_<DATE>_ from front
   	     	 #and _?.<HASH>.tgz from back
 		patient_name=${filename#${pi}_${study}_${date}}
 		patient_name=${patient_name%_${suffix}}
 
-		echo $AUTOBIDS_DIR/etc/getSubjID $SUBJ_EXPR $patient_name
 		subjid=`$AUTOBIDS_DIR/etc/getSubjID $SUBJ_EXPR $patient_name`
+		echo "$filename -> $subjid"
 	fi
 
 	if [ ! $? = 0 ]
@@ -247,32 +250,32 @@ then
 	opts="-t $opts"
 fi
 
-#heudiconv is always run:
-DCM2BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/dcm2bids
 
 #expression for heudiconv
 if [ -n "$TAR_SUBJ_EXPR" ]
 then
 dicom_expr=$tar_dir/${TAR_SUBJ_EXPR}
 else
-dicom_expr=$tar_dir/${pi}_${study}_${date}_${SUBJ_EXPR}_${suffix}
+dicom_expr=$tar_dir/${pi}_${study}_????????_${SUBJ_EXPR}_?.????????.tar
 fi
 
+#dicom conversion is optional 
+if [ -n "$DCM2BIDS_PIPELINE" -a -n "$HEURISTIC" ]
+then
 job_dcm2bids=$($DCM2BIDS_PIPELINE $BIDS_DIR $subjlist -f $HEURISTIC -d $dicom_expr )
-
 
 #prebids pipeline (to create a "more" valid bids dataset) is optional:
 if [ -n "$PRE_BIDS_PIPELINE" ] #run the pipeline referred to in study_cfg
 then
 echo $PRE_BIDS_PIPELINE $BIDS_DIR $subjlist afterany:$job_dcm2bids
-job_prebids=$($PRE_BIDS_PIPELINE $BIDS_DIR $subjlist afterok:$job_dcm2bids)
+job_prebids=$($PRE_BIDS_PIPELINE $BIDS_DIR $subjlist afterany:$job_dcm2bids)
 else
 job_prebids=$job_dcm2bids
 fi
 
 #run bids-validator,  but wait for it to finish to send a confirmation e-mail (depends on heudiconv and prebids finishing)
 echo neurogliaSubmit -j ShortSkinny -d afterany:$job_prebids bids-validator $BIDS_DIR --verbose \> $validator_out 
-job_validator=$(neurogliaSubmit  -j ShortSkinny -d afterok:$job_prebids bids-validator $BIDS_DIR --verbose \> $validator_out )
+job_validator=$(neurogliaSubmit  -j ShortSkinny -d afterany:$job_prebids bids-validator $BIDS_DIR --verbose \> $validator_out )
 
 
 #postbids pipeline (to run on validated bids datasets) is optional:
@@ -285,6 +288,7 @@ then
 regularSubmit -j ShortSkinny -d afterany:$job_prebids  $POST_BIDS_PIPELINE $BIDS_DIR $subjlist 
 fi
 
+fi #run dcm2bids
 
 
 #send e-mail notification with bids-validator output 

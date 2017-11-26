@@ -2,13 +2,15 @@
 
 BIDS_DIR=$AUTOBIDS_DATA/Palaniyappan/TOPSY_7T
 
-SUBJ_EXPR=*TOPSY_{subject}  #search string inside tar (from student HD)
+SUBJ_EXPR=*TOPSY_{subject}  #search string for patientname
 #SUBJ_EXPR=*.TOPSY.{subject}.*.*  #search string inside tar (from student HD)
 
 
 HEURISTIC=$AUTOBIDS_DIR/cfg/heuristics/topsy_7T.py
+
+DCM2BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/heudiconv_bids
 PRE_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/tuneup_bids
-POST_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/fmriprep.1.0.0-rc8
+POST_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/mriqc
 
 EMAIL_NOTIFICATION=alik@robarts.ca
 

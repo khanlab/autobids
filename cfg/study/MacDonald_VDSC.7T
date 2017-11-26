@@ -3,10 +3,11 @@
 BIDS_DIR=$AUTOBIDS_DATA/MacDonald/VDSC_7T
 SUBJ_EXPR=*_{subject}_7T  #search string in patient_name
 
-HEURISTIC=$AUTOBIDS_DIR/cfg/heuristics/snsx_7T.py
+#HEURISTIC=$AUTOBIDS_DIR/cfg/heuristics/snsx_7T.py
 
+DCM2BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/heudiconv_bids
 PRE_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/tuneup_bids_snsx
-#POST_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/fmriprep.1.0.0-rc8
+#POST_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/mriqc
 
 
 EMAIL_NOTIFICATION=alik@robarts.ca
