@@ -71,7 +71,7 @@ DICOMS_DIR=$OUTPUT_DIR/dicoms
 mkdir -p $OUTPUT_DIR $DICOMS_DIR
 
 #put log txt in output folder for now
-LOG=./test.log #$OUTPUT_DIR/log_`date +%Y-%m-%d_%H.%M`.txt
+LOG=$OUTPUT_DIR/log_`date +%Y-%m-%d_%H.%M`.txt
 
 #singularity image defined in CONFIG_DCM_RETRIEVE file
 ((neuroglia \
@@ -83,7 +83,7 @@ ${STUDY_SEARCH} \
 ${DICOMS_DIR} \
 ${KEEP_SORTED_DICOM} \
 ${OUTPUT_DIR} \
-${DATE_SEARCH} 3>&1 1>&2 2>&3 | grep -E -v "^Picked up _JAVA_OPTIONS:|^tar: Removing leading")  3>&1 1>&2 2>&3 )|&  tee $LOG
+${DATE_SEARCH} 3>&1 1>&2 2>&3 | grep -E -v "^Picked up _JAVA_OPTIONS:|^tar: Removing leading")  3>&1 2>&1  )
 #3>&1 1>&2 2>&3 &>>${LOG}
 #tail -n $LOG
 #|& grep -E -v "^Picked up _JAVA_OPTIONS:|^tar: Removing leading"  &>> $LOG
