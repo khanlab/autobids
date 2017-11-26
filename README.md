@@ -39,19 +39,30 @@ cfg
 2. Run getDicomTarballs to get tarballs from the dicom server
 3. Run autobidsProcess on the tarballs to submit jobs that convert to BIDS and pre-process
 
+Note: by default, tar files are moved to the `sourcedata` folder in the BIDS directory
+
 e.g.:
 ```
 getDicomTarballs 'Khan^NeuroAnalytics' '-' ~/projectdir/tarball_dir
 autobidsProcess ~/projectdir/tarball_dir/*.tar
 ```
 
-* Example 2: Trigger processing for newly acquired scans (performs processing one by one)
+* Example 2: Re-process dicoms from an already imported scan, by using sourcedata tar files
+```
+autobidsProcess <YOUR_BIDS_DIR>/sourcedata/*.tar
+```
 
-e.g.: Running the following will retrieve all scans acquired today for all studies
+* Example 3: Trigger processing for newly acquired scans (performs processing one by one)
+
+e.g.: Running the following will retrieve all scans acquired today for all studies, then submit jobs to convert/process
+
 `procNewScans `
 
-e.g.: Or can run with a date string to retrieve a subset of scans
+e.g.: Or can run with a date string to retrieve a subset of scans, then submit jobs to convert/process
+
 `procNewScans '20170815-`
+
+Note: `procNewScans` uses a locking mechanism to ensure the script cannot be initiated when it is already running. This is to ensure no conflicts arise when using cron jobs to retrieve scans.
 
 ### getDicomTarballs:
 
