@@ -33,7 +33,7 @@ cfg
 ## Usage:
 
 
-* Example 1: Retrieving a set of subjects from the dicom server, converting to BIDS and pre-processing
+* Example 1: Retrieving a set of subjects from the dicom server, and batch convert to BIDS and pre-process
 
 1. Create study config file (if not created)
 2. Run getDicomTarballs to get tarballs from the dicom server
@@ -44,6 +44,14 @@ e.g.:
 getDicomTarballs 'Khan^NeuroAnalytics' '-' ~/projectdir/tarball_dir
 autobidsProcess ~/projectdir/tarball_dir/*.tar
 ```
+
+* Example 2: Trigger processing for newly acquired scans (performs processing one by one)
+
+e.g.: Running the following will retrieve all scans acquired today for all studies
+`procNewScans `
+
+e.g.: Or can run with a date string to retrieve a subset of scans
+`procNewScans '20170815-`
 
 ### getDicomTarballs:
 
