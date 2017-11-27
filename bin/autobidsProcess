@@ -233,7 +233,10 @@ do
 	#move tar to source data
 	if [ $nomove_tar = 0 -o $testmode = 1 ]
 	then
-		mv -v $tar $sourcedata
+		if [ ! -e $sourcedata/$filename ]
+		then
+		mv  $tar $sourcedata
+		fi
 		tar_dir=$sourcedata
 	else
 		tar_dir=$folder
