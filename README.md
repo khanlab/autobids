@@ -15,7 +15,7 @@ Add the following to your environment:
 export AUTOBIDS_DIR=/home/akhanf/autobids   #this repository
 export AUTOBIDS_DATA=/project/6007967/akhanf/cfmm-bids/data   #root folder for bids datasets
 ```
-If deploying on a new system, set-up config files:
+If deploying to your own BIDS project directory, set-up config files:
 ```
 cfg
 ├── dicom-retrieve.cfg	# dicom server info
@@ -56,7 +56,7 @@ autobidsProcess <YOUR_BIDS_DIR>/sourcedata/*.tar
 
 e.g.: Running the following will retrieve all scans acquired today for all studies, then submit jobs to convert/process
 
-`procNewScans `
+`procNewScans `date +%Y%m%d`
 
 e.g.: Or can run with a date string to retrieve a subset of scans, then submit jobs to convert/process
 
@@ -81,7 +81,7 @@ Output tarballs are named as:
 ```
 e.g.:
 ```
-Khan_NeuroAnalytics_20171108_2017_11_08_SNSX_C023_1.AC168B21.tgz
+Khan_NeuroAnalytics_20171108_2017_11_08_SNSX_C023_1.AC168B21.tar
 PI: Khan
 STUDY: NeuroAnalytics
 DATE: 20171108
