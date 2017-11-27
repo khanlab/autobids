@@ -1,16 +1,6 @@
 #!/usr/bin/env python
 '''
-query,retrieve sort,tgz and rsync to remote by given study dates
-
-step 1. Check the 5th level depth of the dicom files folder
-        #/bidsdump/Palaniyappan/TOPSY/20170210/patientName
-step 2. If it's today's scan, tar the date folder to a tgz.
-        'Palaniyappan_TOPSY_20170210_patientName.tgz'
-step 3. Rsync the tgz to remote
-
-test: run this command at bidsdump
-sudo python tgz_rsync.py yinglilu 20171003
-sudo python tgz_rsync.py yinglilu 20170530
+query,retrieve sort,and tar
 
 note: findscu getscu are dcm4che's! not dcmtk's
 '''
@@ -25,7 +15,7 @@ import subprocess
 import shutil
 
 FNULL = open(os.devnull, 'w')
-    
+   
 
 def clean_path(path):
     return re.sub(r'[^a-zA-Z0-9.-]', '_', '{0}'.format(path))
@@ -92,7 +82,7 @@ def retrieve_by_key(connect,key_name,key_value,username,password,output_root_dir
     output_dir=os.path.join(output_root_dir,clean_path(key_value))
     
     if not os.path.exists(output_dir):
-        print output_dir
+        #print output_dir
         os.makedirs(output_dir)
         
     #getscu --bind DEFAULT --connect CFMM-Public@dicom.cfmm.robarts.ca:11112 --tls-aes --user YOUR_UWO_USERNAME --user-pass YOUR_PASSWORD -m StudyInstanceUID=1.3.12.2.1107.5.2.34.18932.30000017052914152689000000013
@@ -146,6 +136,7 @@ def sort(dicom_dir,outupt_dir):
                     -2017_11_08_snSx_C025
                         -1.AC168B3C
     '''
+    pp=None
 
     for file in list_files_in_path(dicom_dir):
         dataset = pydicom.read_file(file)
@@ -159,7 +150,7 @@ def sort(dicom_dir,outupt_dir):
             # but not principal can get to their projects
             #self._mkdir(path, permissions=stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO, gid=self.principal_gid)
 
-            print path 
+            #print path 
             os.makedirs(path)
 
         for nextpath in [pp[2],
@@ -173,7 +164,7 @@ def sort(dicom_dir,outupt_dir):
                continue
             else:
                 #self._mkdir(path, permissions=stat.S_IRWXU | stat.S_IRWXG | stat.S_IWOTH | stat.S_IXOTH)
-                print path 
+                #print path 
                 os.makedirs(path)
 
         filename = '{patient}.{modality}.{study}.{series:04d}.{image:04d}.{date}.{unique}.dcm'.format(
@@ -190,9 +181,12 @@ def sort(dicom_dir,outupt_dir):
         shutil.move(file,full_filename)
         
     os.rmdir(dicom_dir) #Only works when the directory is empty, otherwise, OSError is raised
-    
-    StudyID_hashed_StudyInstanceUID_dir = os.path.join(outupt_dir,pp[0],pp[2],dataset.StudyDate, clean_path(patient),'.'.join([dataset.StudyID or 'NA', hashcode(dataset.StudyInstanceUID)]))
-    return StudyID_hashed_StudyInstanceUID_dir
+
+    if pp is None:
+        return None
+    else:
+        StudyID_hashed_StudyInstanceUID_dir = os.path.join(outupt_dir,pp[0],pp[2],dataset.StudyDate, clean_path(patient),'.'.join([dataset.StudyID or 'NA', hashcode(dataset.StudyInstanceUID)]))
+        return StudyID_hashed_StudyInstanceUID_dir
         
 def tgz_dicom_dir(dicom_dir,tgz_dest_dir,PI_start_index,uid_string):
     '''
@@ -207,6 +201,9 @@ def tgz_dicom_dir(dicom_dir,tgz_dest_dir,PI_start_index,uid_string):
         tgz_full_filename:
 
     '''
+    if dicom_dir is None:
+        return None
+
     dir_split=dicom_dir.split('/') 
     tgz_filename=clean_path("_".join(dir_split[PI_start_index:])+".tar")
     uid_filename=clean_path("_".join(dir_split[PI_start_index:])+".uid")
@@ -217,7 +214,7 @@ def tgz_dicom_dir(dicom_dir,tgz_dest_dir,PI_start_index,uid_string):
         myfile.write(uid_string)
 
     #debug
-    print tgz_cmd
+    #print tgz_cmd
     #subprocess.check_output(tgz_cmd, stderr=subprocess.STDOUT, shell=True)
     p = subprocess.Popen(tgz_cmd, stdout=sys.stdout,stderr=sys.stderr,shell=True)
     p.wait()
@@ -314,7 +311,7 @@ def main(uwo_username,
             sys.stdout.flush()
             StudyID_hashed_StudyInstanceUID_dir = sort(dicom_dir,sorted_dest_dir)
 
-            sys.stdout.writelines('  tgz-ing...\n')
+            sys.stdout.writelines('  tar-ing...\n')
             sys.stdout.flush()
             #StudyID_hashed_StudyInstanceUID_dir=/path/to/sorted_dest_dir/PI/project/StudyDate/patientname/studyID.hashcode(studyinstanceuid)
             #tgz filename='PI_project_studydate_patient_name/studyID.hashcode(studyinstanceuid)
