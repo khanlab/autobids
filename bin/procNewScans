@@ -59,7 +59,7 @@ done
 
 #process each individually
 count=`ls -1 $scratch_dir/*.tar 2> /dev/null  | wc -l `
-if [ "$count" -gt 1 ]
+if [ "$count" -gt 0 ]
 then
 for tar in `ls $scratch_dir/*.tar`
 do

@@ -4,5 +4,5 @@
 autobids_cfg=$AUTOBIDS_DIR/cfg/study
 
 pushd $autobids_cfg > /dev/null
-ls -d * | awk -F '_' '{print $1}' 
+ls -d * | awk -F '_' '{print $1}' | uniq
 popd $autobids_cfg > /dev/null
