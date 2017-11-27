@@ -112,8 +112,7 @@ BIDS_DIR=$AUTOBIDS_DATA/Palaniyappan/TOPSY_7T		#bids folder
 
 SUBJ_EXPR=*TOPSY_{subject}  	#search string for subject id within PatientName dicom tag
 				# Note:  must include {subject}
-				#	Example:
-				# 		
+	
 
 
 HEURISTIC=$AUTOBIDS_DIR/cfg/heuristics/topsy_7T.py
