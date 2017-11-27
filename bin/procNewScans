@@ -3,6 +3,7 @@
 # Line below locks the script so cannot be run simultaneously (i.e. to prevent conflicts)
 [ "${FLOCKER}" != "$0" ] && exec env FLOCKER="$0" flock -en "$0" "$0" "$@" || :
 
+
 CONFIG_DCM_RETRIEVE=$AUTOBIDS_DIR/cfg/dicom-retrieve.cfg
 #load in CONFIG_DCM_RETRIEVE file
 if [ -e $CONFIG_DCM_RETRIEVE  ]
@@ -14,24 +15,41 @@ else
 fi
 
 
-
 if [ "$#" -lt 1 ]
 then
-    dates=$(date +'%Y%m%d')
-else
-    dates=$@
+	echo "Usage: $0 <date-string> <optional: PI name (default loops through all)>"
+	exit 1
+fi
+
+date=$1
+
+#if [ "$#" -lt 1 ]
+#then
+#    date=$(date +'%Y%m%d')
+#else
+#    date=$1
+#fi
+
+if [ "$#" -gt 1 ]
+then
+	custom_PI=$2
 fi
 
 mkdir -p $RETRIEVE_LOG_DIR
 LOG=$RETRIEVE_LOG_DIR/`date +%Y-%m-%d`.txt
 
-for date in $dates
-do
 
 scratch_dir=/scratch/$USER/incoming_$RANDOM
 
 #download tarballs for all studies
-for study in `$AUTOBIDS_DIR/etc/getListStudies`
+if [ -n "$custom_PI" ]
+then
+	studies=$custom_PI
+else
+	studies=`$AUTOBIDS_DIR/etc/getListStudies`
+fi
+
+for study in $studies
 do
  
  echo Retrieving dicoms for ${study}* on ${date}... | tee -a $LOG
@@ -46,13 +64,39 @@ then
 for tar in `ls $scratch_dir/*.tar`
 do
   tar_name=${tar##*/}
+  uid_file=${tar%%.tar}.uid
+  uid=`cat $uid_file`
+  
+  PI=${tar_name%%_*}
+  mkdir -p $INCOMING_TAR_DIR/$PI
+
   if [ ! $(grep ${tar_name} $DOWNLOADED_TAR_LIST) ]
   then
-	echo $tar_name >> $DOWNLOADED_TAR_LIST
-	autobidsProcess $tar 
+	  autobidsProcess $tar
+	  if [ "$?" = 0 ]
+	  then
+		echo "autobidsProcess completed without errors: $tar_name" | tee -a $LOG
+   	  else
+		#tar does not map to an existing study-uid
+		echo "autobidsProcess failed for $tar_name" | tee -a $LOG
+  	 fi
+		#if tarfile not moved to project folder, then move to incoming
+		 if [ -e $tar ]
+		then
+			echo "  Moving $tar_name to $INCOMING_TAR_DIR/$PI" | tee -a $LOG
+			mv -v $tar $INCOMING_TAR_DIR/$PI
+			mv -v $uid_file $INCOMING_TAR_DIR/$PI
+		fi
+
+
+	 	#in either case, add to downloaded list so does not re-download
+		echo "	Appending $tar_name to $DOWNLOADED_TAR_LIST" | tee -a $LOG
+		echo "  Appending $uid to $DOWNLOADED_UID_LIST" | tee -a $LOG
+	 	echo $tar_name >> $DOWNLOADED_TAR_LIST
+		echo $uid >> $DOWNLOADED_UID_LIST
+
   fi
 
 done
 fi
 
-done

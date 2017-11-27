@@ -21,7 +21,7 @@ fi
 
 jobid_fmap=$(neurogliaSubmit  -d $depends -j ShortSkinny $AUTOBIDS_DIR/etc/correctFieldMap $bids_dir $subjlist )
 jobid_multiecho=$(neurogliaSubmit  -d $depends -j ShortSkinny $AUTOBIDS_DIR/etc/correctMultiEcho $bids_dir $subjlist )
-jobid_tsv=$(neurogliaSubmit  -d afterok:$jobid_fmap:$jobid_multiecho -j ShortSkinny $AUTOBIDS_DIR/etc/cleanParticipantsFile $bids_dir )
+jobid_tsv=$(neurogliaSubmit  -d afterany:$jobid_fmap:$jobid_multiecho -j ShortSkinny $AUTOBIDS_DIR/etc/cleanParticipantsFile $bids_dir )
 
 echo $jobid_tsv
 

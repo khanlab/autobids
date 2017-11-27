@@ -194,7 +194,7 @@ def sort(dicom_dir,outupt_dir):
     StudyID_hashed_StudyInstanceUID_dir = os.path.join(outupt_dir,pp[0],pp[2],dataset.StudyDate, clean_path(patient),'.'.join([dataset.StudyID or 'NA', hashcode(dataset.StudyInstanceUID)]))
     return StudyID_hashed_StudyInstanceUID_dir
         
-def tgz_dicom_dir(dicom_dir,tgz_dest_dir,PI_start_index):
+def tgz_dicom_dir(dicom_dir,tgz_dest_dir,PI_start_index,uid_string):
     '''
     tgz dir
 
@@ -209,9 +209,13 @@ def tgz_dicom_dir(dicom_dir,tgz_dest_dir,PI_start_index):
     '''
     dir_split=dicom_dir.split('/') 
     tgz_filename=clean_path("_".join(dir_split[PI_start_index:])+".tar")
+    uid_filename=clean_path("_".join(dir_split[PI_start_index:])+".uid")
     tgz_full_filename=os.path.join(tgz_dest_dir,tgz_filename)
     tgz_cmd = 'tar cf {} {}'.format(tgz_full_filename,dicom_dir)
-    
+  
+    with open(os.path.join(tgz_dest_dir,uid_filename), 'w') as myfile:
+        myfile.write(uid_string)
+
     #debug
     print tgz_cmd
     #subprocess.check_output(tgz_cmd, stderr=subprocess.STDOUT, shell=True)
@@ -250,7 +254,9 @@ def main(uwo_username,
              sorted_dest_dir, 
              keep_sorted_dest_dir_flag,
              tgz_dest_dir, 
-             study_date_list):
+             study_date,
+             list_downloaded):
+
 
     '''
     main workflow: query,retrieve,tgz
@@ -266,18 +272,17 @@ def main(uwo_username,
         study_date_list
     
     '''
+
+    #get list of already downloaded uids
+    if (list_downloaded != 0):
+        with open(list_downloaded, 'r') as myfile:
+            downloaded_uids=myfile.read().replace('\n', ' ')
+
     #find StudyInstanceUID by matching key
     StudyInstanceUID_list=[]
-    if study_date_list==0:
-        sys.stderr.write('getting all studies!\n')
-        matching_key= "-m StudyDescription='{}'".format(PI_matching_key)
-        StudyInstanceUID_list_one_study_date=find_StudyInstanceUID_by_matching_key(connect,matching_key,uwo_username,uwo_password)
-        StudyInstanceUID_list.extend(StudyInstanceUID_list_one_study_date)
-    else:
-        for study_date in study_date_list:
-            matching_key= "-m StudyDescription='{}' -m StudyDate='{}'".format(PI_matching_key,study_date)
-            StudyInstanceUID_list_one_study_date=find_StudyInstanceUID_by_matching_key(connect,matching_key,uwo_username,uwo_password)
-            StudyInstanceUID_list.extend(StudyInstanceUID_list_one_study_date)
+    matching_key= "-m StudyDescription='{}' -m StudyDate='{}'".format(PI_matching_key,study_date)
+    StudyInstanceUID_list_one_study_date=find_StudyInstanceUID_by_matching_key(connect,matching_key,uwo_username,uwo_password)
+    StudyInstanceUID_list.extend(StudyInstanceUID_list_one_study_date)
 
     if not StudyInstanceUID_list:
         sys.stderr.write('No data to retrieve!\n')
@@ -290,6 +295,14 @@ def main(uwo_username,
     key_name='StudyInstanceUID' #dcm4che's must have key if getscu study level
     for index,key_value in enumerate(StudyInstanceUID_list):
         if key_value: #no null
+
+            #check if key-value exists in downloaded list
+            if (list_downloaded != 0):
+                if key_value in downloaded_uids:
+                    sys.stdout.writelines('#{} of {}: Skipping, existing StudyInstanceUID-{}\n'.format(int(index)+1,len(StudyInstanceUID_list),key_value))
+                    sys.stdout.flush()
+                    continue
+
             sys.stdout.writelines('#{} of {}: StudyInstanceUID-{}\n'.format(int(index)+1,len(StudyInstanceUID_list),key_value))
             sys.stdout.flush()
 
@@ -306,14 +319,15 @@ def main(uwo_username,
             #StudyID_hashed_StudyInstanceUID_dir=/path/to/sorted_dest_dir/PI/project/StudyDate/patientname/studyID.hashcode(studyinstanceuid)
             #tgz filename='PI_project_studydate_patient_name/studyID.hashcode(studyinstanceuid)
             PI_index=len(sorted_dest_dir.split('/')) #this index is where PI starts
-            tgz_full_filename = tgz_dicom_dir(StudyID_hashed_StudyInstanceUID_dir,tgz_dest_dir,PI_index)
+            tgz_full_filename = tgz_dicom_dir(StudyID_hashed_StudyInstanceUID_dir,tgz_dest_dir,PI_index,key_value)
+
 
             if not keep_sorted_dest_dir_flag:
                 shutil.rmtree(StudyID_hashed_StudyInstanceUID_dir)
                 shutil.rmtree(sorted_dest_dir)
 
 if __name__=="__main__":
-    if len(sys.argv)-1 < 7:
+    if len(sys.argv)-1 < 8:
         print ("Usage: python " + os.path.basename(__file__)+ 
         "uwo_username, \
          uwo_password, \
@@ -322,7 +336,8 @@ if __name__=="__main__":
          sorted_dest_dir, \
          keep_sorted_dicom_flag \
          tgz_dest_dir, \
-         scan_date")
+         scan_date, \
+         list_downloaded_uids")
         sys.exit()
     else:
         
@@ -333,11 +348,12 @@ if __name__=="__main__":
         sorted_dest_dir=sys.argv[5]
         keep_sorted_dicom_flag= (sys.argv[6]=='True')
         tgz_dest_dir=sys.argv[7]
-        if len(sys.argv)-1 > 7:
-            study_date_list=sys.argv[8:]
+        study_date=sys.argv[8]
+        if len(sys.argv)-1>8:
+            list_downloaded=sys.argv[9]
         else:
-            study_date_list=0
-        
+            list_downloaded=0;
+
         main(uwo_username, 
              uwo_password, 
              connect, 
@@ -345,4 +361,5 @@ if __name__=="__main__":
              sorted_dest_dir, 
              keep_sorted_dicom_flag,
              tgz_dest_dir, 
-             study_date_list)
+             study_date,
+             list_downloaded)

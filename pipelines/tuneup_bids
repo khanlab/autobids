@@ -7,7 +7,7 @@ subjlist=$2		#list of (new) subject IDs to process, where ID is from sub-ID1
 depends=$3		#job dependencies
 
 jobid_fmap=$(neurogliaSubmit -d $depends -j ShortSkinny $AUTOBIDS_DIR/etc/correctFieldMap $bids_dir $subjlist )
-jobid_tsv=$(neurogliaSubmit -d afterok:$jobid_fmap -j ShortSkinny $AUTOBIDS_DIR/etc/cleanParticipantsFile $bids_dir )
+jobid_tsv=$(neurogliaSubmit -d afterany:$jobid_fmap -j ShortSkinny $AUTOBIDS_DIR/etc/cleanParticipantsFile $bids_dir )
 
 echo $jobid_tsv
 

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#pipeline to clean participants.tsv (sort, remove 4th column)
+
+bids_dir=$1  		#path to bids dir
+subjlist=$2		#list of (new) subject IDs to process, where ID is from sub-ID1
+depends=$3		#job dependencies
+
+jobid_tsv=$(neurogliaSubmit -d $depends -j Quick $AUTOBIDS_DIR/etc/cleanParticipantsFile $bids_dir )
+
+echo $jobid_tsv
+
+exit 0
