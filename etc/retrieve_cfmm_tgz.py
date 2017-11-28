@@ -13,9 +13,14 @@ import re
 import pydicom
 import subprocess
 import shutil
+import time
 
 FNULL = open(os.devnull, 'w')
    
+#check PACS data completeness
+SLEEP_SEC=20
+TIMEOUT_SEC=4*60*60 #4 hours
+
 
 def clean_path(path):
     return re.sub(r'[^a-zA-Z0-9.-]', '_', '{0}'.format(path))
@@ -44,6 +49,38 @@ def find_StudyInstanceUID_by_matching_key(connect,matching_key,username,password
 
     output:list,[StudyInstanceUID1,StudyInstanceUID2,...]
     '''
+
+    #check PACS server data completeness 
+    cmd_query_NumberOfStudyRelatedInstances = 'findscu'+\
+          ' --bind  DEFAULT' +\
+          ' --connect {}'.format(connect)+\
+          ' --tls-aes --user {} --user-pass {} '.format(username,password)+\
+          ' {}'.format(matching_key) +\
+          ' -r 00201208'+\
+          ' |grep -i NumberOfStudyRelatedInstances |cut -d[ -f 2|cut -d] -f 1'
+
+    pre = subprocess.check_output(cmd_query_NumberOfStudyRelatedInstances, shell=True)
+    time_elapsed=0
+    
+    while time_elapsed<TIMEOUT_SEC:
+        #wait SLEEP_SEC
+        time.sleep(SLEEP_SEC)
+        time_elapsed=time_elapsed+SLEEP_SEC
+
+        #query again
+        current = subprocess.check_output(cmd_query_NumberOfStudyRelatedInstances, shell=True)
+    
+        if pre == current:
+            break
+        else:
+            pre=current
+            print 'Wating: data uploading to PACS server.'
+    
+    #debug
+    #print pre
+    #print current    
+          
+    
     #findscu --bind DEFAULT --connect CFMM-Public@dicom.cfmm.robarts.ca:11112 -m StudyDescription='Khan*' -m StudyDate='20171116' --tls-aes --user username --user-pass password -r StudyInstanceUID |grep -i 0020,000D |cut -d '[' -f 2 | cut -d ']' -f 1
     cmd = 'findscu'+\
           ' --bind  DEFAULT' +\
