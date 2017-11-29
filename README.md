@@ -14,6 +14,7 @@ Add the following to your environment:
 ```
 export AUTOBIDS_DIR=/home/akhanf/autobids   #this repository
 export AUTOBIDS_DATA=/project/6007967/akhanf/cfmm-bids/data   #root folder for bids datasets
+export PATH=$AUTOBIDS_DIR:$PATH
 ```
 If deploying to your own BIDS project directory, set-up config files:
 ```
