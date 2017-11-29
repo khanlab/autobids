@@ -12,9 +12,9 @@ Automated Dicom to BIDS and pipelines using compute canada
 
 Add the following to your environment:
 ```
-export AUTOBIDS_DIR=/home/akhanf/autobids   #this repository
-export AUTOBIDS_DATA=/project/6007967/akhanf/cfmm-bids/data   #root folder for bids datasets
-export PATH=$AUTOBIDS_DIR:$PATH
+echo "export AUTOBIDS_DIR=/home/akhanf/autobids   #this repository" >> ~/.bashrc
+echo "export AUTOBIDS_DATA=/project/6007967/akhanf/cfmm-bids/data" >> ~/.bashrc
+echo "export PATH=$AUTOBIDS_DIR:$PATH" >> ~/.bashrc
 ```
 If deploying to your own BIDS project directory, set-up config files:
 ```
