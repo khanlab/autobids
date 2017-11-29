@@ -14,7 +14,7 @@ Add the following to your environment:
 ```
 echo "export AUTOBIDS_DIR=/home/akhanf/autobids   #this repository" >> ~/.bashrc
 echo "export AUTOBIDS_DATA=/project/6007967/akhanf/cfmm-bids/data" >> ~/.bashrc
-echo "export PATH=$AUTOBIDS_DIR:$PATH" >> ~/.bashrc
+echo "export PATH=$AUTOBIDS_DIR/bin:$PATH" >> ~/.bashrc
 ```
 If deploying to your own BIDS project directory, set-up config files:
 ```
