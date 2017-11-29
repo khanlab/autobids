@@ -7,6 +7,12 @@ then
 fi 
 in_bids=$1
 
+
+#assumes python script is in same folder as this wrapper -- eventually just replace this..
+exec_path=`dirname $0`
+
+
+
 if [ "$#" -gt 1 ]
 then
 	subjlist=`cat $2`
@@ -14,7 +20,6 @@ then
 else
 	subjlist=`tail -n +2 $in_bids/participants.tsv | awk '{print $1}' `
 fi
-#correct field map json files
 
 
 for subj in $subjlist
@@ -22,6 +27,10 @@ do
 
 	subj=${subj##sub-} #strip off sub- if it exists, to make consistent
 
-	$AUTOBIDS_DIR/etc/multiecho_bids_corrector.py $in_bids/sub-$subj/anat
+	$exec_path/multiecho_bids_corrector.py $in_bids/sub-$subj/anat
+	if [ -e $in_bids/derivatives/distortion_corrected/sub-$subj/anat ]
+	then
+	$exec_path/multiecho_bids_corrector.py $in_bids/derivatives/distortion_corrected/sub-$subj/anat
+	fi
 
 done

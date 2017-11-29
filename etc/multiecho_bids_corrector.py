@@ -16,8 +16,8 @@ print('multi-echo corrector')
 print(multiecho_dir)
 
 #puts all json and nifti files in the folder into lists
-json_files = glob.glob(multiecho_dir + "/*.json")
-nifti_files = glob.glob(multiecho_dir + "/*.nii.gz")
+json_files = sorted(glob.glob(multiecho_dir + "/*GRE?.json"))
+nifti_files = sorted(glob.glob(multiecho_dir + "/*GRE?.nii.gz"))
 print(json_files)
 print(nifti_files)
 for i,k in zip(json_files, nifti_files):
@@ -30,10 +30,12 @@ for i,k in zip(json_files, nifti_files):
     if ("EchoNumber" not in data) and ("_echo_" in i):
         js_addEchoNum = re.sub("_echo_", "_echo-1_", i)
         js_changeEnding = re.sub("GRE.*", "GRE.json", js_addEchoNum)
+        print('renaming: '+i+' to '+js_changeEnding)
         os.rename(i, js_changeEnding)
         
         ni_addEchoNum = re.sub("_echo_", "_echo-1_", k)
         ni_changeEnding = re.sub("GRE.*", "GRE.nii.gz", ni_addEchoNum)
+        print('renaming: '+k+' to '+ni_changeEnding)
         os.rename(k, ni_changeEnding)
     
     #otherwise get EchoNumber value from json file and insert into filename
@@ -42,9 +44,11 @@ for i,k in zip(json_files, nifti_files):
         
         js_addEchoNum = re.sub("_echo_", "_echo-" + str(echonum) + "_", i)
         js_changeEnding = re.sub("GRE.*", "GRE.json", js_addEchoNum)
+        print('renaming: '+i+' to '+js_changeEnding)
         os.rename(i, js_changeEnding)
         
         ni_addEchoNum = re.sub("_echo_", "_echo-" + str(echonum) + "_", k)
         ni_changeEnding = re.sub("GRE.*", "GRE.nii.gz", ni_addEchoNum)
+        print('renaming: '+k+' to '+ni_changeEnding)
         os.rename(k, ni_changeEnding)
 
