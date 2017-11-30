@@ -15,6 +15,9 @@ def infotodict(seqinfo):
     seqitem: run number during scanning
     subindex: sub index within group
     """
+    
+    #MP2RAGE
+
     t1 = create_key('sub-{subject}/anat/sub-{subject}_acq-MP2RAGE_T1w')
     t1map = create_key('sub-{subject}/anat/sub-{subject}_acq-MP2RAGE_T1map')
     t1inv1 = create_key('sub-{subject}/anat/sub-{subject}_inv-1_MP2RAGE')
@@ -28,8 +31,12 @@ def infotodict(seqinfo):
 
     t2 = create_key('sub-{subject}/anat/sub-{subject}_acq-tse2D_T2w')
 
-    rest = create_key('sub-{subject}/func/sub-{subject}_task-rest_bold')
-    rest_sbref = create_key('sub-{subject}/func/sub-{subject}_task-rest_sbref')
+    rest = create_key('sub-{subject}/func/sub-{subject}_task-rest_run-{item:01d}_bold')
+    rest_sbref = create_key('sub-{subject}/func/sub-{subject}_task-rest_run-{item:01d}_sbref')
+
+    rest_psf = create_key('sub-{subject}/func/sub-{subject}_acq-psf_task-rest_run-{item:01d}_bold')
+    rest_psf_dico = create_key('sub-{subject}/func/sub-{subject}_acq-psf_task-rest_run-{item:01d}_rec-dico_bold')
+
     dwi_PA = create_key('sub-{subject}/dwi/sub-{subject}_acq-PA_dwi')
     dwi_PA_sbref = create_key('sub-{subject}/dwi/sub-{subject}_acq-PA_sbref')
     dwi_AP = create_key('sub-{subject}/dwi/sub-{subject}_acq-AP_dwi')
@@ -47,9 +54,9 @@ def infotodict(seqinfo):
     TOF_angio = create_key('sub-{subject}/anat/sub-{subject}_acq-TOF_angio')
 
     #MIPS
-    DIS2D_TOF_SAG = create_key('/sub-{subject}/anat/sub-{subject}_acq-TOFSAG_rec-DIS2D_mip')
-    DIS2D_TOF_COR = create_key('/sub-{subject}/anat/sub-{subject}_acq-TOFCOR_rec-DIS2D_mip')
-    DIS2D_TOF_TRA = create_key('/sub-{subject}/anat/sub-{subject}_acq-TOFTRA_rec-DIS2D_mip')
+    DIS2D_TOF_SAG = create_key('sub-{subject}/anat/sub-{subject}_acq-TOFSAG_rec-DIS2D_mip')
+    DIS2D_TOF_COR = create_key('sub-{subject}/anat/sub-{subject}_acq-TOFCOR_rec-DIS2D_mip')
+    DIS2D_TOF_TRA = create_key('sub-{subject}/anat/sub-{subject}_acq-TOFTRA_rec-DIS2D_mip')
 
     #########################
     #### Multi-echo GRE #####
@@ -59,15 +66,15 @@ def infotodict(seqinfo):
     mag_echo_GRE = create_key('sub-{subject}/anat/sub-{subject}_part-mag_echo_GRE')
     phase_echo_GRE = create_key('sub-{subject}/anat/sub-{subject}_part-phase_echo_GRE')
 
-    DIS2D_mag_echo_GRE = create_key('/sub-{subject}/anat/sub-{subject}_part-mag_rec-DIS2D_echo_GRE')
-    DIS2D_phase_echo_GRE = create_key('/sub-{subject}/anat/sub-{subject}_part-phase_rec-DIS2D_echo_GRE')
-    DIS3D_mag_echo_GRE = create_key('/sub-{subject}/anat/sub-{subject}_part-mag_rec-DIS3D_echo_GRE')
-    DIS3D_phase_echo_GRE = create_key('/sub-{subject}/anat/sub-{subject}_part-phase_rec-DIS3D_echo_GRE')
+    DIS2D_mag_echo_GRE = create_key('sub-{subject}/anat/sub-{subject}_part-mag_rec-DIS2D_echo_GRE')
+    DIS2D_phase_echo_GRE = create_key('sub-{subject}/anat/sub-{subject}_part-phase_rec-DIS2D_echo_GRE')
+    DIS3D_mag_echo_GRE = create_key('sub-{subject}/anat/sub-{subject}_part-mag_rec-DIS3D_echo_GRE')
+    DIS3D_phase_echo_GRE = create_key('sub-{subject}/anat/sub-{subject}_part-phase_rec-DIS3D_echo_GRE')
 
     #Derived T2 star - seem to only be calculated with DIS2D
     T2_star = create_key('sub-{subject}/anat/sub-{subject}_T2star')
-    DIS2D_T2_star = create_key('/sub-{subject}/anat/sub-{subject}_rec-DIS2D_T2star')
-    DIS3D_T2_star = create_key('/sub-{subject}/anat/sub-{subject}_rec-DIS3D_T2star')
+    DIS2D_T2_star = create_key('sub-{subject}/anat/sub-{subject}_rec-DIS2D_T2star')
+    DIS3D_T2_star = create_key('sub-{subject}/anat/sub-{subject}_rec-DIS3D_T2star')
 
     # MEMP2RAGE #
     me_t1     = create_key('sub-{subject}/anat/sub-{subject}_acq-MEMP2RAGE_T1w')
@@ -89,6 +96,7 @@ def infotodict(seqinfo):
              b1map:[],b1inv1:[],b1inv2:[],b1div:[],
              t2:[],
              rest:[],rest_sbref:[],
+             rest_psf:[],rest_psf_dico:[],
              dwi_PA:[],dwi_AP:[],dwi_PA_sbref:[],dwi_AP_sbref:[],
              fmap_PA:[],fmap_PA_sbref:[],fmap_diff:[],fmap_magnitude:[],
              me_t1:[],me_t1map:[],me_t1inv1:[],me_t1inv1:[],me_t1inv2:[],me_t1uni:[],
@@ -96,6 +104,7 @@ def infotodict(seqinfo):
              dir_t2:[], DIS2D_dir_t2:[]}
 
     for idx, s in enumerate(seqinfo):
+
     #memp2rage
         if ('memp2rage' in s.protocol_name):
             if ('UNI-DEN' in (s.series_description).strip()):
@@ -160,11 +169,17 @@ def infotodict(seqinfo):
         
         #rs func (incl opp phase enc)
         if ('bold' in s.protocol_name):
-            if ('AP_rs' in (s.series_description).strip()):
+            if ('mbep2d' in (s.series_description).strip() and 'AP' in (s.series_description).strip()):
                 if (s.dim4==1 and  'SBRef' in (s.series_description).strip()):
                     info[rest_sbref].append({'item': s.series_id})
                 else:
                     info[rest].append({'item': s.series_id})
+ 
+            if ('mi_ep2d' in (s.series_description).strip()):
+                if ('DICO'  in (s.image_type[4].strip())):
+                    info[rest_psf_dico].append({'item': s.series_id})
+                else:
+                    info[rest_psf].append({'item': s.series_id})
                     
             if ('PA' in (s.series_description).strip()):
                 if (s.dim4==1 and  'SBRef' in (s.series_description).strip()):
