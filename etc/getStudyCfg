@@ -47,8 +47,24 @@ do
 done
 if [ ! -e $autocfg ]
 then
-	echo "ERROR in $0: config not found, $autocfg"
-	exit 1
+
+	default=$AUTOBIDS_DIR/cfg/study/default
+	autocfg=$AUTOBIDS_DIR/cfg/study/${pi}_${study}
+	
+	if [ -e $default ]  
+	then
+	 	echo "Study config not found, creating $autocfg from default" >&2 
+		cp -v $default $autocfg >&2
+	else
+	 	echo "Study config not found, and default does not exist: $default" >&2
+		exit 1
+	fi
+
+	if [ ! -e $autocfg ]
+	then
+		echo "ERROR in $0: config could not be created: $autocfg (check write-permissions)" >&2
+		exit 1
+	fi
 fi
 
 echo $autocfg

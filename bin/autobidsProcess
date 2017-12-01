@@ -74,12 +74,14 @@ then
 fi
 
 
+#parse tarfile to get study config name
 study_cfg=`$AUTOBIDS_DIR/etc/getStudyCfg $in_tar`
 if [ ! $? = 0 ]
 then
  echo "ERROR in $0: study config not found"
  exit 1
 fi
+
 
 in_folder=`realpath $in_tar`
 in_folder=${in_folder%/*}
@@ -128,20 +130,26 @@ source $study_cfg
 
 
 #add checks here to ensure all required variables are set:
-if [ ! -n $BIDS_DIR ]
+if [ ! -n "$BIDS_DIR" ]
 then
-	echo ERROR in $0: BIDS_DIR not defined in $study_cfg
-	exit 1
+	#if BIDS_DIR not defined, then set it based on $study_cfg
+	cfg_name=${study_cfg##*/}
+	pi_name=${cfg_name%%_*}
+	study_name=${cfg_name##${pi_name}_}
+
+	BIDS_DIR=$AUTOBIDS_DATA/$pi_name/$study_name
+	echo "Using default BIDS_DIR=$BIDS_DIR"
 fi
 
-if [ ! -n $SUBJ_EXPR ]
+
+if [ ! -n "$SUBJ_EXPR" ]
 then
 	echo ERROR in $0: SUBJ_EXPR not defined in $study_cfg
 	exit 1
 fi
 
 #HEURISTIC optional
-#if [ -n $HEURISTIC ]
+#if [ -n "$HEURISTIC" ]
 #then
 #	if [ ! -e $HEURISTIC ]
 #	then
@@ -154,7 +162,7 @@ fi
 #fi
 
 #optional: PRE_BIDS_SCRIPT
-if [ -n $PRE_BIDS_SCRIPT ]
+if [ -n "$PRE_BIDS_SCRIPT" ]
 then
 	if [ ! -e $PRE_BIDS_SCRIPTS ]
 	then
@@ -165,7 +173,7 @@ fi
 
 
 #optional: POST_BIDS_SCRIPT
-if [ -n $POST_BIDS_SCRIPT ]
+if [ -n "$POST_BIDS_SCRIPT" ]
 then
 	if [ ! -e $POST_BIDS_SCRIPTS ]
 	then
@@ -191,9 +199,12 @@ code_dir=$BIDS_DIR/code
 sourcedata=$BIDS_DIR/sourcedata
 mkdir -p $code_dir $sourcedata
 
-subjlist=$code_dir/subjects-list_`date +%Y-%m-%d_%H.%M`.txt
-validator_out=$code_dir/bids-validator_`date +%Y-%m-%d_%H.%M`.txt
+datestring=`date +%Y-%m-%d_%H.%M`
+subjlist=$code_dir/subjects-list_${datestring}.txt
+validator_out=$code_dir/bids-validator_${datestring}.txt
+heudiconv_out=$code_dir/heudiconv_${datestring}
 
+# parse tarfile names to get subjids
 for tar in $in_tar
 do
 	filename=${tar##*/}
@@ -268,6 +279,11 @@ fi
 if [ -n "$DCM2BIDS_PIPELINE" -a -n "$HEURISTIC" ]
 then
 job_dcm2bids=$($DCM2BIDS_PIPELINE $BIDS_DIR $subjlist -f $HEURISTIC -d $dicom_expr )
+
+
+#move .heudiconv after done
+job_heudimove=$(regularSubmit -j Quick -N heudi-mv -d afterany:$job_dcm2bids "mv $BIDS_DIR/.heudiconv $heudiconv_out")
+
 
 #prebids pipeline (to create a "more" valid bids dataset) is optional:
 if [ -n "$PRE_BIDS_PIPELINE" ] #run the pipeline referred to in study_cfg
