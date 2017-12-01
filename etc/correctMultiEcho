@@ -27,10 +27,13 @@ do
 
 	subj=${subj##sub-} #strip off sub- if it exists, to make consistent
 
-	$exec_path/multiecho_bids_corrector.py $in_bids/sub-$subj/anat
-	if [ -e $in_bids/derivatives/distortion_corrected/sub-$subj/anat ]
-	then
-	$exec_path/multiecho_bids_corrector.py $in_bids/derivatives/distortion_corrected/sub-$subj/anat
-	fi
+	$exec_path/meGRE_bids_corrector.py $in_bids/sub-$subj/anat
 
+
+#	if [ -e $in_bids/derivatives/distortion_corrected/sub-$subj/anat ]
+#	then
+#	$exec_path/meGRE_bids_corrector.py $in_bids/derivatives/distortion_corrected/sub-$subj/anat
+#	fi
+
+	$exec_path/memp2rage_bids_corrector.py $in_bids/sub-$subj/anat
 done
