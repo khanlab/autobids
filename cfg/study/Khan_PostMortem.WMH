@@ -1,7 +1,7 @@
 #!/bin/bash
 
-BIDS_DIR=$AUTOBIDS_DATA/Khan/SNSX_7T
-SUBJ_EXPR=*[xX]_{subject}  #search string in patient_name
+SUBJ_EXPR=*_BrainSet{subject}  #search string for patientname
+
 
 HEURISTIC=$AUTOBIDS_DIR/cfg/heuristics/cfmm.py
 
@@ -9,5 +9,5 @@ DCM2BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/heudiconv_bids
 PRE_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/tuneup_bids
 POST_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/mriqc
 
-
 EMAIL_NOTIFICATION=alik@robarts.ca
+

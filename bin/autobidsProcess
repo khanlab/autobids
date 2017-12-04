@@ -12,12 +12,6 @@ function usage {
 }
 	#option for specifying study_cfg
 
-if [ "$#" -lt 1 ]
-then
-  usage;
-  exit 1;
-fi
-
 testmode=0
 study_cfg=""
 nomove_tar=0
@@ -44,6 +38,14 @@ while getopts "c:tkf:" options; do
 done
 
 shift $((OPTIND-1))
+
+if [ "$#" -lt 1 ]
+then
+  usage;
+  exit 1;
+fi
+
+
 if [ "$#" -gt 1 ]
 then
 	single_subj=0

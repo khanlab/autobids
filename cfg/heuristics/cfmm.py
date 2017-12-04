@@ -40,23 +40,25 @@ def infotodict(seqinfo):
 
     #MP2RAGE
 
-    inv1_mp2rage = create_key('sub-{subject}/anat/sub-{subject}_inv-1_MP2RAGE')
-    inv2_mp2rage = create_key('sub-{subject}/anat/sub-{subject}_inv-2_MP2RAGE')
-    t1map = create_key('sub-{subject}/anat/sub-{subject}_T1map')
-    t1w = create_key('sub-{subject}/anat/sub-{subject}_T1w')
-    uni_mp2rage = create_key('sub-{subject}/anat/sub-{subject}_acq-UNI_MP2RAGE')
+    t1w_mprage = create_key('sub-{subject}/anat/sub-{subject}_acq-MPRAGE_run-{item:02d}_T1w')
+
+    inv1_mp2rage = create_key('sub-{subject}/anat/sub-{subject}_inv-1_run-{item:02d}_MP2RAGE')
+    inv2_mp2rage = create_key('sub-{subject}/anat/sub-{subject}_inv-2_run-{item:02d}_MP2RAGE')
+    t1map = create_key('sub-{subject}/anat/sub-{subject}_acq-MP2RAGE_run-{item:02d}_T1map')
+    t1w = create_key('sub-{subject}/anat/sub-{subject}_acq-MP2RAGE_run-{item:02d}_T1w')
+    uni_mp2rage = create_key('sub-{subject}/anat/sub-{subject}_acq-UNI_run-{item:02d}_MP2RAGE')
 
         #Dist. corrected versions:
     DIS3D_inv1_mp2rage = create_key('sub-{subject}/anat/sub-{subject}_inv-1_rec-DIS3D_MP2RAGE')
     DIS3D_inv2_mp2rage = create_key('sub-{subject}/anat/sub-{subject}_inv-2_rec-DIS3D_MP2RAGE')
-    DIS3D_t1map = create_key('sub-{subject}/anat/sub-{subject}_rec-DIS3D_T1map')
-    DIS3D_t1w = create_key('sub-{subject}/anat/sub-{subject}_rec-DIS3D_T1w')
+    DIS3D_t1map = create_key('sub-{subject}/anat/sub-{subject}_acq-MP2RAGE_rec-DIS3D_T1map')
+    DIS3D_t1w = create_key('sub-{subject}/anat/sub-{subject}_acq-MP2RAGE_rec-DIS3D_T1w')
     DIS3D_uni_mp2rage = create_key('sub-{subject}/anat/sub-{subject}_acq-UNI_rec-DIS3D_MP2RAGE')
 
     DIS2D_inv1_mp2rage = create_key('sub-{subject}/anat/sub-{subject}_inv-1_rec-DIS2D_MP2RAGE')
     DIS2D_inv2_mp2rage = create_key('sub-{subject}/anat/sub-{subject}_inv-2_rec-DIS2D_MP2RAGE')
-    DIS2D_t1map = create_key('sub-{subject}/anat/sub-{subject}_rec-DIS2D_T1map')
-    DIS2D_t1w = create_key('sub-{subject}/anat/sub-{subject}_rec-DIS2D_T1w')
+    DIS2D_t1map = create_key('sub-{subject}/anat/sub-{subject}_acq-MP2RAGE_rec-DIS2D_T1map')
+    DIS2D_t1w = create_key('sub-{subject}/anat/sub-{subject}_acq-MP2RAGE_rec-DIS2D_T1w')
     DIS2D_uni_mp2rage = create_key('sub-{subject}/anat/sub-{subject}_acq-UNI_rec-DIS2D_MP2RAGE')
 
 
@@ -75,9 +77,19 @@ def infotodict(seqinfo):
 
 
     #2D TSE
-    t2_tse = create_key('sub-{subject}/anat/sub-{subject}_acq-tse_run-${item:02d}_T2w')
-    DIS2D_t2_tse = create_key('sub-{subject}/anat/sub-{subject}_acq-tse_run-{item:02d}_rec-DIS2D_T2w')
-    DIS3D_t2_tse = create_key('sub-{subject}/anat/sub-{subject}_acq-tse_run-{item:02d}_rec-DIS3D_T2w')
+    t2_tse = create_key('sub-{subject}/anat/sub-{subject}_acq-TSE_run-{item:02d}_T2w')
+    DIS2D_t2_tse = create_key('sub-{subject}/anat/sub-{subject}_acq-TSE_run-{item:02d}_rec-DIS2D_T2w')
+    DIS3D_t2_tse = create_key('sub-{subject}/anat/sub-{subject}_acq-TSE_run-{item:02d}_rec-DIS3D_T2w')
+
+    #2D TSE Transverse
+    tse_tra_T2w = create_key('sub-{subject}/anat/sub-{subject}_acq-TSEtra_T2w')
+    DIS2D_tse_tra_T2w = create_key('sub-{subject}/anat/sub-{subject}_acq-TSEtra_rec-DIS2D_T2w')
+    DIS3D_tse_tra_T2w = create_key('sub-{subject}/anat/sub-{subject}_acq-TSEtra_rec-DIS3D_T2w')
+
+    #2D TSE Coronal
+    tse_cor_T2w = create_key('sub-{subject}/anat/sub-{subject}_acq-TSEcor_T2w')
+    DIS2D_tse_cor_T2w = create_key('sub-{subject}/anat/sub-{subject}_acq-TSEcor_rec-DIS2D_T2w')
+    DIS3D_tse_cor_T2w = create_key('sub-{subject}/anat/sub-{subject}_acq-TSEcor_rec-DIS3D_T2w')
 
 
 
@@ -88,6 +100,9 @@ def infotodict(seqinfo):
 
     rest_psf = create_key('sub-{subject}/func/sub-{subject}_acq-psf_task-rest_run-{item:02d}_bold')
     rest_psf_dico = create_key('sub-{subject}/func/sub-{subject}_acq-psf_task-rest_run-{item:02d}_rec-dico_bold')
+
+    movie = create_key('sub-{subject}/func/sub-{subject}_task-movie_run-{item:02d}_bold')
+    movie_sbref = create_key('sub-{subject}/func/sub-{subject}_task-movie_run-{item:02d}_sbref')
 
 
     #Diffusion
@@ -105,11 +120,19 @@ def infotodict(seqinfo):
     fmap_magnitude = create_key('sub-{subject}/fmap/sub-{subject}_magnitude')
 
     #T2 SPACE
-    spc_T2w = create_key('sub-{subject}/anat/sub-{subject}_acq-spc_T2w')
+    spc_T2w = create_key('sub-{subject}/anat/sub-{subject}_acq-SPACE_run-{item:02d}_T2w')
 
     #Dist. corr. versions:
-    DIS2D_spc_T2w = create_key('sub-{subject}/anat/sub-{subject}_acq-spc_rec-DIS2D_T2w')
-    DIS3D_spc_T2w = create_key('sub-{subject}/anat/sub-{subject}_acq-spc_rec-DIS3D_T2w')
+    DIS2D_spc_T2w = create_key('sub-{subject}/anat/sub-{subject}_acq-SPACE_rec-DIS2D_run-{item:02d}_T2w')
+    DIS3D_spc_T2w = create_key('sub-{subject}/anat/sub-{subject}_acq-SPACE_rec-DIS3D_run-{item:02d}_T2w')
+
+    #FLAIR
+    spc_FLAIR = create_key('sub-{subject}/anat/sub-{subject}_acq-SPACE_run-{item:02d}_FLAIR')
+
+    #Dist. corr. versions:
+    DIS2D_spc_FLAIR = create_key('sub-{subject}/anat/sub-{subject}_acq-SPACE_rec-DIS2D_run-{item:02d}_FLAIR')
+    DIS3D_spc_FLAIR = create_key('sub-{subject}/anat/sub-{subject}_acq-SPACE_rec-DIS3D_run-{item:02d}_FLAIR')
+
 
     #Time-of-flight Angio
     TOF_angio = create_key('sub-{subject}/anat/sub-{subject}_acq-TOF_angio')
@@ -118,9 +141,9 @@ def infotodict(seqinfo):
     DIS3D_TOF_angio = create_key('sub-{subject}/anat/sub-{subject}_acq-TOF_rec-DIS3D_angio')
 
     #MIPS
-    DIS2D_TOF_SAG = create_key('sub-{subject}/anat/sub-{subject}_acq-TOFSAG_rec-DIS2D_mip')
-    DIS2D_TOF_COR = create_key('sub-{subject}/anat/sub-{subject}_acq-TOFCOR_rec-DIS2D_mip')
-    DIS2D_TOF_TRA = create_key('sub-{subject}/anat/sub-{subject}_acq-TOFTRA_rec-DIS2D_mip')
+    DIS2D_TOF_SAG = create_key('sub-{subject}/anat/sub-{subject}_acq-TOF_rec-DIS2D_sagMIP')
+    DIS2D_TOF_COR = create_key('sub-{subject}/anat/sub-{subject}_acq-TOF_rec-DIS2D_corMIP')
+    DIS2D_TOF_TRA = create_key('sub-{subject}/anat/sub-{subject}_acq-TOF_rec-DIS2D_traMIP')
 
     #########################
     #### Multi-echo GRE #####
@@ -156,7 +179,7 @@ def infotodict(seqinfo):
     dir_t2       = create_key('sub-{subject}/anat/sub-{subject}_acq-DIR_T2w')
     DIS2D_dir_t2 = create_key('sub-{subject}/anat/sub-{subject}_acq-DIR_rec-DIS2D_T2w')
 
-    info = { inv1_mp2rage:[],t1map:[],t1w:[],uni_mp2rage:[],inv2_mp2rage:[],
+    info = { t1w_mprage:[],inv1_mp2rage:[],t1map:[],t1w:[],uni_mp2rage:[],inv2_mp2rage:[],
              DIS2D_inv1_mp2rage:[],DIS2D_t1map:[],DIS2D_t1w:[],DIS2D_inv2_mp2rage:[],DIS2D_uni_mp2rage:[],
              DIS3D_inv1_mp2rage:[],DIS3D_t1map:[],DIS3D_t1w:[],DIS3D_inv2_mp2rage:[],DIS3D_uni_mp2rage:[],
 
@@ -178,6 +201,7 @@ def infotodict(seqinfo):
 	     DIS3D_T2_star:[],
 
              spc_T2w:[], DIS2D_spc_T2w:[], DIS3D_spc_T2w:[],
+             spc_FLAIR:[], DIS2D_spc_FLAIR:[], DIS3D_spc_FLAIR:[],
             
              inv_1_sa2rage:[],inv_2_sa2rage:[],b1Div_sa2rage:[],b1map_sa2rage:[],
                         DIS2D_inv_1_sa2rage:[],DIS2D_inv_2_sa2rage:[],DIS2D_b1Div_sa2rage:[],DIS2D_b1map_sa2rage:[],
@@ -185,8 +209,13 @@ def infotodict(seqinfo):
 
              t2_tse:[], DIS2D_t2_tse:[], DIS3D_t2_tse:[],
 
+             tse_tra_T2w:[], DIS2D_tse_tra_T2w:[], DIS3D_tse_tra_T2w:[],
+	     tse_cor_T2w:[], DIS2D_tse_cor_T2w:[], DIS3D_tse_cor_T2w:[],
+
+
 
              rest:[],rest_sbref:[],
+             movie:[],movie_sbref:[],
              rest_psf:[],rest_psf_dico:[],
 
              dwi:[],dwi_sbref:[],
@@ -224,18 +253,50 @@ def infotodict(seqinfo):
                     info[me_t1uni].append({'item': s.series_id})
             if ('T1_Images' in (s.series_description).strip()):
                 info[me_t1map].append({'item': s.series_id})
-    #mp2rage
-        elif ('mp2rage' in s.protocol_name):
-            if ('UNI-DEN' in (s.series_description).strip()):
-                info[t1].append({'item': s.series_id})
-            if ('T1_Images' in (s.series_description).strip()):
-                info[t1map].append({'item': s.series_id})
-            if ('INV1' in (s.series_description).strip()):
-                info[t1inv1].append({'item': s.series_id})
-            if ('INV2' in (s.series_description).strip()):
-                info[t1inv2].append({'item': s.series_id})
-            if ('UNI_Images' in (s.series_description).strip()):
-                info[t1uni].append({'item': s.series_id})
+
+
+
+		#mp2rage
+        if ('mp2rage' in s.series_description):
+    			if ('INV1' in (s.series_description).strip()):
+                                if ('DIS2D' in (s.image_type[3].strip())):
+    		    		    info[DIS2D_inv1_mp2rage].append({'item': s.series_id})
+                                if ('DIS3D' in (s.image_type[3].strip())):
+    		    		    info[DIS3D_inv1_mp2rage].append({'item': s.series_id})
+                                if ('ND' in (s.image_type[3].strip())):
+    		    		    info[inv1_mp2rage].append({'item': s.series_id})
+			if ('T1_Images' in (s.series_description).strip()):
+                                if ('DIS2D' in (s.image_type[3].strip())):
+                                    info[DIS2D_t1map].append({'item': s.series_id})                                
+                                if ('DIS3D' in (s.image_type[3].strip())):
+                                    info[DIS3D_t1map].append({'item': s.series_id})
+                                if ('ND' in (s.image_type[3].strip())):
+    		    		    info[t1map].append({'item': s.series_id})
+			if ('UNI-DEN' in (s.series_description).strip()):
+                                if ('ND' in (s.image_type[3].strip())):
+    		    		    info[t1w].append({'item': s.series_id})
+                                elif ('DIS2D' in (s.image_type[4].strip())):
+                                    info[DIS2D_t1w].append({'item': s.series_id})
+                                elif ('DIS3D' in (s.image_type[4].strip())):
+                                    info[DIS3D_t1w].append({'item': s.series_id})
+                        if ('UNI_Images' in (s.series_description).strip()):
+                                if ('DIS2D' in (s.image_type[3].strip())):
+    		    		    info[DIS2D_uni_mp2rage].append({'item': s.series_id})
+                                if ('DIS3D' in (s.image_type[3].strip())):
+    		    	            info[DIS3D_uni_mp2rage].append({'item': s.series_id})
+                                if ('ND' in (s.image_type[3].strip())):
+    		    		    info[uni_mp2rage].append({'item': s.series_id})
+			if ('_INV2' in (s.series_description).strip()):
+                                if ('DIS2D' in (s.image_type[3].strip())):
+    		    		    info[DIS2D_inv2_mp2rage].append({'item': s.series_id})
+                                if ('DIS3D' in (s.image_type[3].strip())):
+    		    		    info[DIS3D_inv2_mp2rage].append({'item': s.series_id})
+                                if ('ND' in (s.image_type[3].strip())):
+    		    		    info[inv2_mp2rage].append({'item': s.series_id})
+
+
+        if ('mprage' in s.protocol_name):
+                info[t1w_mprage].append({'item': s.series_id})
 
     #dir t2
     #note: for all distortion corrected data, no protocol name due to post-scan processing
@@ -275,7 +336,27 @@ def infotodict(seqinfo):
 
   
         #t2 tse
-        if ('t2_tse' in s.series_description): 
+	#tse tra T2w
+        if ('t2_tse_tra' in s.series_description): 
+	            if ('ND' in (s.image_type[3].strip())):
+    		        info[tse_tra_T2w].append({'item': s.series_id})
+                    if ('DIS3D' in (s.image_type[3].strip())):
+    		        info[DIS3D_tse_tra_T2w].append({'item': s.series_id})
+                    if ('DIS2D' in (s.image_type[3].strip())):
+    		        info[DIS2D_tse_tra_T2w].append({'item': s.series_id})
+
+
+                #tse cor T2w
+        elif ('t2_tse_cor' in s.series_description): 
+	            if ('ND' in (s.image_type[3].strip())):
+    		        info[tse_cor_T2w].append({'item': s.series_id})
+                    if ('DIS3D' in (s.image_type[3].strip())):
+    		        info[DIS3D_tse_cor_T2w].append({'item': s.series_id})
+                    if ('DIS2D' in (s.image_type[3].strip())):
+    		        info[DIS2D_tse_cor_T2w].append({'item': s.series_id})
+
+
+        elif ('t2_tse' in s.series_description): 
 	            if ('ND' in (s.image_type[3].strip())):
     		        info[t2_tse].append({'item': s.series_id})
                     if ('DIS3D' in (s.image_type[3].strip())):
@@ -286,8 +367,15 @@ def infotodict(seqinfo):
 
        
         #rs func (incl opp phase enc)
-        if ('bold' in s.protocol_name):
-            if ('mbep2d' in (s.series_description).strip() and 'AP' in (s.series_description).strip()):
+        if ('Movie' in (s.series_description).strip()):
+            if (s.dim4==1 and  'SBRef' in (s.series_description).strip()):
+                    info[movie_sbref].append({'item': s.series_id})
+            else:
+                    info[movie].append({'item': s.series_id})
+
+        
+        elif ('bold' in s.protocol_name):
+            if ('mbep2d' in (s.series_description).strip() or 'ep_bold' in (s.series_description).strip() ):
                 if (s.dim4==1 and  'SBRef' in (s.series_description).strip()):
                     info[rest_sbref].append({'item': s.series_id})
                 else:
@@ -300,12 +388,13 @@ def infotodict(seqinfo):
                     info[rest_psf].append({'item': s.series_id})
                     
             if ('PA' in (s.series_description).strip()):
-                if (s.dim4==1 and  'SBRef' in (s.series_description).strip()):
-                    info[fmap_PA_sbref].append({'item': s.series_id})
-                else:
-                    info[fmap_PA].append({'item': s.series_id})
+                if (s.dim4==1):
+                    if 'SBRef' in (s.series_description).strip():
+                        info[fmap_PA_sbref].append({'item': s.series_id})
+                    else:
+                        info[fmap_PA].append({'item': s.series_id})
 
-        #gre field map   
+                   #gre field map   
         if ('field_mapping' in s.protocol_name):   
             if (s.dim4 == 1) and ('gre_field_mapping' == (s.series_description).strip()):
                 if('P' in (s.image_type[2].strip()) ):
@@ -315,13 +404,13 @@ def infotodict(seqinfo):
 
         #dwi
         if ('diff' in s.protocol_name):
-            if ( s.dim4 > 1 and ('mbep2d_diff' in (s.series_description).strip()) ) :
+            if ( s.dim4 > 1 and ('DIFFUSION' in s.image_type[2].strip()) and ('ORIGINAL' in s.image_type[0].strip()) ):
                 info[dwi].append({'item': s.series_id})
-            if ( s.dim4 == 1 and ('mbep2d_diff' in (s.series_description).strip()) and 'SBRef' in (s.series_description).strip() ) :
+            if ( s.dim4 == 1  and 'SBRef' in (s.series_description).strip() ) :
                 info[dwi_sbref].append({'item': s.series_id})
 
         #susceptibility ND multiecho
-	if ('susc' in s.series_description):
+	if ('susc' in s.series_description or 'gre3d' in s.series_description):
 	    if ('M' in (s.image_type[2].strip())):
                  if ('ND' in (s.image_type[3].strip())):
     	            info[mag_echo_GRE].append({'item': s.series_id})
@@ -348,13 +437,22 @@ def infotodict(seqinfo):
     	        info[DIS3D_T2_star].append({'item': s.series_id})
 
  	#spc T2w
-        if ('spc_T2' in s.series_description): 
+        if ('spc_T2' in s.series_description or 't2_space' in s.series_description): 
             if ('ND' in (s.image_type[3].strip())):
 	        info[spc_T2w].append({'item': s.series_id})
             if ('DIS2D' in (s.image_type[3].strip())):
 	        info[DIS2D_spc_T2w].append({'item': s.series_id})
             if ('DIS3D' in (s.image_type[3].strip())):
                 info[DIS3D_spc_T2w].append({'item': s.series_id})
+    
+        #spc T2w
+        if ('spc_flair' in s.series_description ): 
+            if ('ND' in (s.image_type[3].strip())):
+	        info[spc_FLAIR].append({'item': s.series_id})
+            if ('DIS2D' in (s.image_type[3].strip())):
+	        info[DIS2D_spc_FLAIR].append({'item': s.series_id})
+            if ('DIS3D' in (s.image_type[3].strip())):
+                info[DIS3D_spc_FLAIR].append({'item': s.series_id})
 
 	#TOF angio
         if ('3D_TOF' in s.series_description): 
