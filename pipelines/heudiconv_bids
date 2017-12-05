@@ -25,10 +25,12 @@ while getopts "f:d:" options; do
   esac
 done
 
-#SINGULARITY_IMG=/project/6007967/akhanf/singularity/akhanf_heudiconv_0.4.1.img
-SINGULARITY_IMG=shub://akhanf/heudiconv
+SINGULARITY_IMG=/project/6007967/akhanf/singularity/akhanf_heudiconv_0.4.1.img
+#SINGULARITY_IMG=shub://akhanf/heudiconv
+#SINGULARITY_IMG=/scratch/akhanf/akhanf-heudiconv-master.simg
 
-job_dcm2bids=$(neurogliaBatch  heudiconv $subjlist -b "--tempdir /scratch/${USER}/\${SLURM_JOB_ID}_\${SLURM_ARRAY_TASK_ID} --overwrite -b -d ${input_string} -o $bids_dir -f $heuristic -s" -j 2core8gb )
+#SCRATCH_DIR is set by neurogliaBatch inside jobfile
+job_dcm2bids=$(neurogliaBatch  heudiconv $subjlist -b "--tempdir \$SCRATCH_DIR --overwrite -b -d ${input_string} -o $bids_dir -f $heuristic -s" -j 2core8gb )
 
 echo $job_dcm2bids
 exit 0
