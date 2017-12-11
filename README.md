@@ -10,12 +10,25 @@ Automated Dicom to BIDS and pipelines using compute canada
 
 ## Install:
 
-Add the following to your environment:
+Clone the autobids repository to your home directory:
+```
+git clone http://github.com/khanlab/autobids ~/autobids
+```
+
+Create a folder in your project space for your bids data:
+```
+mkdir -p ~/projects/rrg-akhanf/$USER/bids
+```
+
+Run the following to set-up your environment (re-login afterwards):
 ```
 echo "export AUTOBIDS_DIR=~/autobids   #this repository" >> ~/.bashrc
-echo "export AUTOBIDS_DATA=~/project/$USER/cfmm-bids/data" >> ~/.bashrc
+echo "export AUTOBIDS_DATA=~/projects/rrg-akhanf/$USER/bids" >> ~/.bashrc
 echo "export PATH=$AUTOBIDS_DIR/bin:$PATH" >> ~/.bashrc
 ```
+
+## Config files:
+
 If deploying to your own BIDS project directory, set-up config files:
 ```
 cfg
@@ -29,6 +42,44 @@ cfg
     ├── MacDonald_VDSC.3T
     ├── MacDonald_VDSC.7T
     └── Palaniyappan_TOPSY
+```
+
+
+## Study Config Files:
+
+A study config file defines a subject ID mapping, the heuristic file to use, and the pipelines to run for dicom conversion, bids tune-up, and post-processing. ** NEW: If it does not exist, a config file will automatically be generated when you run autobidsProcess, using the default study config file **
+
+
+The name of the study config file is used to match up a incoming study tarball to a study.
+The filename must thus be structured as:
+```
+<PI>_<STUDY>.<OPTIONAL_WILDCARD>
+```
+The contents of the study config file specifies the BIDS folder (BIDS_DIR), how to determine 
+subject ID automatically from the PatientName tag (SUBJ_EXPR), how to convert to BIDS (HEURISTIC) 
+and optionally what pipelines to automatically run (PRE_BIDS_PIPELINE, POST_BIDS_PIPELINE)
+	
+	
+The OPTIONAL_WILDCARD is matched against the name of the incoming tarball to determine 
+
+Example: 
+```
+#!/bin/bash
+
+#BIDS_DIR is optional, if it is not included will default to:  $AUTOBIDS_DATA/{PI}/{STUDY_NAME}
+
+BIDS_DIR=$AUTOBIDS_DATA/Palaniyappan/TOPSY_7T		
+
+SUBJ_EXPR=*TOPSY_{subject}  	#search string for subject id within PatientName dicom tag
+				# Note:  must include {subject}
+	
+
+
+HEURISTIC=$AUTOBIDS_DIR/cfg/heuristics/topsy_7T.py
+PRE_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/tuneup_bids
+POST_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/mriqc
+
+EMAIL_NOTIFICATION=alik@robarts.ca
 ```
 
 ## Usage:
@@ -91,34 +142,3 @@ INSTANCE_NUMBER: 1
 RANDOM_HASH: AC168B21
 ```
 
-### Study Config Files:
-
-The name of the study config file is used to match up a incoming study tarball to a study.
-The filename must thus be structured as:
-```
-<PI>_<STUDY>.<OPTIONAL_WILDCARD>
-```
-The contents of the study config file specifies the BIDS folder (BIDS_DIR), how to determine 
-subject ID automatically from the PatientName tag (SUBJ_EXPR), how to convert to BIDS (HEURISTIC) 
-and optionally what pipelines to automatically run (PRE_BIDS_PIPELINE, POST_BIDS_PIPELINE)
-	
-	
-The OPTIONAL_WILDCARD is matched against the name of the incoming tarball to determine 
-
-Example: 
-```
-#!/bin/bash
-
-BIDS_DIR=$AUTOBIDS_DATA/Palaniyappan/TOPSY_7T		#bids folder
-
-SUBJ_EXPR=*TOPSY_{subject}  	#search string for subject id within PatientName dicom tag
-				# Note:  must include {subject}
-	
-
-
-HEURISTIC=$AUTOBIDS_DIR/cfg/heuristics/topsy_7T.py
-PRE_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/tuneup_bids
-POST_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/mriqc
-
-EMAIL_NOTIFICATION=alik@robarts.ca
-```
