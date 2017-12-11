@@ -29,7 +29,18 @@ echo "export PATH=$AUTOBIDS_DIR/bin:$PATH" >> ~/.bashrc
 
 ## Config files:
 
-If deploying to your own BIDS project directory, set-up config files:
+Config files are located in ```$AUTOBIDS_DIR/cfg``` and are used to customize behaviour for different studies.
+
+* cfg/dicom-retrieve.cfg
+Global configuration for dcm4che singularity image path, PACS server, log folder
+
+* cfg/study_cfg
+Folder for study config files, created for each study, and customized for setting up subject-id mapping and custom pipelines. The default study config, ```cfg/study_cfg/default```, is used as a template to generate a new study_cfg file if one does not exist. More detail in the section below
+
+* cfg/heuristics   
+Folder for heudiconv heuristic files (.py), must be referenced by a study config file to be used.
+Note that the ```cfmm.py``` heuristic is the general heuristic referred to in the default study config file.
+
 ```
 cfg
 ├── dicom-retrieve.cfg	# dicom server info
@@ -47,7 +58,7 @@ cfg
 
 ## Study Config Files:
 
-A study config file defines a subject ID mapping, the heuristic file to use, and the pipelines to run for dicom conversion, bids tune-up, and post-processing. ** NEW: If it does not exist, a config file will automatically be generated when you run autobidsProcess, using the default study config file **
+A study config file defines a subject ID mapping, the heuristic file to use, and the pipelines to run for dicom conversion, bids tune-up, and post-processing. ** NEW: If it does not exist, a config file will automatically be generated when you run ```autobidsProcess```, using the ```default``` study config file **
 
 
 The name of the study config file is used to match up a incoming study tarball to a study.
