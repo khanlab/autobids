@@ -23,7 +23,7 @@ function usage {
   echo "Retrieves studies based on StudyDescription & Date.  If date not provided, all studies are downloaded"
   echo "Uses credentials in ~/.uwo_credentials or prompts for username/password" 
   echo ""
-  echo "Usage: `basename $0` '<studydesc-search>' '<date-search>' '<output folder>'   <optional flags>"
+  echo "Usage: `basename $0` '<studydesc-search>' '<date-search>' <output folder>  <optional flags>"
   echo "	Example (all scans on specific date): `basename $0` 'Khan*' '20170530' myfolder"
   echo "	Example (all scans since date): `basename $0` 'Khan*' '20170530-' myfolder"
   echo "	Example (all scans in date range): `basename $0` 'Khan^NeuroAnalytics' '20170530-20170827' myfolder"
