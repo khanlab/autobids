@@ -1,0 +1,13 @@
+#!/bin/bash
+
+BIDS_DIR=$AUTOBIDS_DATA/Olivia/GEvSE
+SUBJ_EXPR=*[xX]_{subject}  #search string in patient_name
+
+HEURISTIC=$AUTOBIDS_DIR/cfg/heuristics/GEvSE.py
+
+DCM2BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/heudiconv_bids
+PRE_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/tuneup_bids
+#POST_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/mriqc
+
+
+EMAIL_NOTIFICATION=ostanle2@uwo.ca
