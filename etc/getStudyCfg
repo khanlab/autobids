@@ -18,13 +18,20 @@ in_dir=${in_dir%/*}
 
 in=${in##*/}
 
-
+#new parsing that allows for underscores in study name
 pi=`echo $in | awk  -F '_' '{print $1}'`
-study=`echo $in | awk  -F '_' '{print $2}'`
-date=`echo $in | awk  -F '_' '{print $3}'`
+pi_study=${in%%_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_*}
+study=${pi_study##${pi}_}
+date_etc=${in##${pi}_${study}_}
+date=${date_etc%%_*}
 
-patient=${in#*_*_*_}
-patient=${patient%%.*}
+patient_etc=${date_etc##${date}_}
+patient=${patient_etc%%.*}
+
+echo pi: $pi 
+echo study: $study
+echo date: $date
+echo patient: $patient
 
 #echo $pi $study $date $patient
 
