@@ -28,10 +28,6 @@ date=${date_etc%%_*}
 patient_etc=${date_etc##${date}_}
 patient=${patient_etc%%.*}
 
-echo pi: $pi 
-echo study: $study
-echo date: $date
-echo patient: $patient
 
 #echo $pi $study $date $patient
 
