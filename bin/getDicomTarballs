@@ -50,7 +50,7 @@ UWO_CREDNTIALS=~/.uwo_credentials
 if [ ! -e $UWO_CREDNTIALS ]
 then
 read -p "UWO Username: " UWO_USERNAME
-read -sp "UWO Password: " UWO_PASSWORD
+read -srp "UWO Password: " UWO_PASSWORD
 else
 UWO_USERNAME=$(sed -n '1 p' ${UWO_CREDNTIALS})
 UWO_PASSWORD=$(sed -n '2 p' ${UWO_CREDNTIALS})
