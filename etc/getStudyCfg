@@ -26,7 +26,7 @@ date_etc=${in##${pi}_${study}_}
 date=${date_etc%%_*}
 
 patient_etc=${date_etc##${date}_}
-patient=${patient_etc%%.*}
+patient=${patient_etc%%_[0-9].*}
 
 
 #echo $pi $study $date $patient
