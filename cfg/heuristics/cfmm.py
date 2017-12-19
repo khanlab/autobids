@@ -295,7 +295,7 @@ def infotodict(seqinfo):
     		    		    info[inv2_mp2rage].append({'item': s.series_id})
 
 
-        if ('mprage' in s.protocol_name):
+        if ('mprage' in s.protocol_name or 'T1w' in s.protocol_name):
                 info[t1w_mprage].append({'item': s.series_id})
 
     #dir t2
@@ -437,7 +437,7 @@ def infotodict(seqinfo):
     	        info[DIS3D_T2_star].append({'item': s.series_id})
 
  	#spc T2w
-        if ('spc_T2' in s.series_description or 't2_space' in s.series_description): 
+        if ('spc_T2' in s.series_description or 'T2w_SPC' in s.series_description or 't2_space' in s.series_description): 
             if ('ND' in (s.image_type[3].strip())):
 	        info[spc_T2w].append({'item': s.series_id})
             if ('DIS2D' in (s.image_type[3].strip())):
