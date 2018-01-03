@@ -67,12 +67,23 @@ else
 	exit 1
 fi
 
+if [ ! -e $DOWNLOADED_TAR_LIST ]
+then
+	touch ${DOWNLOADED_TAR_LIST}
+fi
+
+if [ ! -e $DOWNLOADED_UID_LIST ]
+then
+	touch ${DOWNLOADED_UID_LIST}
+fi
+
+
+
 DICOMS_DIR=$OUTPUT_DIR/dicoms
 mkdir -p $OUTPUT_DIR $DICOMS_DIR
 
 #singularity image defined in CONFIG_DCM_RETRIEVE file
-((neuroglia \
-${RETRIEVE_SCRIPT}  \
+(($SINGULARITY_IMG \
 ${UWO_USERNAME} \
 ${UWO_PASSWORD} \
 ${CONNECT} \

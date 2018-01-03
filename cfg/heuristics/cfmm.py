@@ -179,6 +179,16 @@ def infotodict(seqinfo):
     dir_t2       = create_key('sub-{subject}/anat/sub-{subject}_acq-DIR_T2w')
     DIS2D_dir_t2 = create_key('sub-{subject}/anat/sub-{subject}_acq-DIR_rec-DIS2D_T2w')
 
+    #MT-on and MT-off GRE (magnetization transfer)
+    mag_MT_on_GRE = create_key('sub-{subject}/anat/sub-{subject}_acq-MTon_GRE')
+    DIS2D_mag_MT_on_GRE = create_key('sub-{subject}/anat/sub-{subject}_acq-MTon_rec-DIS2D_GRE')
+    DIS3D_mag_MT_on_GRE = create_key('sub-{subject}/anat/sub-{subject}_acq-MTon_rec-DIS3D_GRE')
+    
+    mag_MT_off_GRE = create_key('sub-{subject}/anat/sub-{subject}_acq-MToff_GRE')
+    DIS2D_mag_MT_off_GRE = create_key('sub-{subject}/anat/sub-{subject}_acq-MToff_rec-DIS2D_GRE')
+    DIS3D_mag_MT_off_GRE = create_key('sub-{subject}/anat/sub-{subject}_acq-MToff_rec-DIS3D_GRE')
+
+
     info = { t1w_mprage:[],inv1_mp2rage:[],t1map:[],t1w:[],uni_mp2rage:[],inv2_mp2rage:[],
              DIS2D_inv1_mp2rage:[],DIS2D_t1map:[],DIS2D_t1w:[],DIS2D_inv2_mp2rage:[],DIS2D_uni_mp2rage:[],
              DIS3D_inv1_mp2rage:[],DIS3D_t1map:[],DIS3D_t1w:[],DIS3D_inv2_mp2rage:[],DIS3D_uni_mp2rage:[],
@@ -195,6 +205,15 @@ def infotodict(seqinfo):
 		DIS2D_phase_echo_GRE:[],
 		DIS3D_mag_echo_GRE:[],
 		DIS3D_phase_echo_GRE:[],
+
+            mag_MT_on_GRE:[],
+		DIS2D_mag_MT_on_GRE:[],
+		DIS3D_mag_MT_on_GRE:[],
+
+            mag_MT_off_GRE:[],
+		DIS2D_mag_MT_off_GRE:[],
+		DIS3D_mag_MT_off_GRE:[],
+
 
 	     T2_star:[],
 	     DIS2D_T2_star:[],
@@ -426,6 +445,27 @@ def infotodict(seqinfo):
     	            info[DIS2D_phase_echo_GRE].append({'item': s.series_id})
                  if ('DIS3D' in (s.image_type[3].strip())):
     	            info[DIS3D_phase_echo_GRE].append({'item': s.series_id})
+
+        # MTon GRE (excludes phase image since not needed)
+        if ('gre_ptx_MT_On' in s.series_description ):
+	    if ('M' in (s.image_type[2].strip())):
+                 if ('ND' in (s.image_type[3].strip())):
+    	            info[mag_MT_on_GRE].append({'item': s.series_id})
+                 if ('DIS2D' in (s.image_type[3].strip())):
+    	            info[DIS2D_mag_MT_on_GRE].append({'item': s.series_id})
+                 if ('DIS3D' in (s.image_type[3].strip())):
+    	            info[DIS3D_mag_MT_on_GRE].append({'item': s.series_id})
+        #MToff GRE
+        if ('gre_ptx_MT_Off' in s.series_description ):
+            if ('M' in (s.image_type[2].strip())):
+                 if ('ND' in (s.image_type[3].strip())):
+                    info[mag_MT_off_GRE].append({'item': s.series_id})
+                 if ('DIS2D' in (s.image_type[3].strip())):
+                    info[DIS2D_mag_MT_off_GRE].append({'item': s.series_id})
+                 if ('DIS3D' in (s.image_type[3].strip())):
+                    info[DIS3D_mag_MT_off_GRE].append({'item': s.series_id})
+
+                    
 
 	#T2star
 	if ('T2Star' in s.series_description):

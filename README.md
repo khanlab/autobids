@@ -4,8 +4,8 @@ Automated Dicom to BIDS and pipelines using compute canada
 
 ## Dependencies:
 
-* dcm4che Singularity image
-* neuroglia-helpers
+* retrieve_cfmm  (http://github.com/khanlab/retrieve_cfmm.git)
+* neuroglia-helpers (http://github.com/khanlab/neuroglia-helpers.git)
 
 
 ## Install:
