@@ -9,6 +9,7 @@ function usage {
 	echo "  -c <study_cfg>: Specify study cfg (default: looks up study_cfg using tar name)"
 	echo "  -k: Keep tar files in original folder (default: move tar files to BIDS/sourcedata)"
 	echo "  -f <subj_expr>: Override {subject} to search within tar filename (default: uses SUBJ_EXPR in study_cfg to search within patient_name)"
+	echo "  -d <bids_dir>: Override custom output BIDS_DIR  (default: uses \$AUTOBIDS_DATA/PI/STUDY )"
 }
 	#option for specifying study_cfg
 
@@ -18,10 +19,11 @@ nomove_tar=0
 is_custom_cfg=0
 simplesubjid=0
 TAR_SUBJ_EXPR=
+CUSTOM_BIDS_DIR=
 
 opts="" #options for neuroglia/etc tools
 
-while getopts "c:tkf:" options; do
+while getopts "c:tkf:d:" options; do
  case $options in
     k ) echo "	Keeping tar files in original folder" >&2
 	nomove_tar=1;;
@@ -29,6 +31,8 @@ while getopts "c:tkf:" options; do
 	testmode=1;;
     f ) echo "	Overriding SUBJ_EXPR for tar filename: $OPTARG" >&2
 	TAR_SUBJ_EXPR=$OPTARG;;
+    d ) echo "	Overriding output BIDS_DIR as: $OPTARG" >&2
+	CUSTOM_BIDS_DIR=`realpath $OPTARG`;;
     c ) echo "  Using custom study_cfg: $OPTARG" >&2
 	is_custom_cfg=1
 	study_cfg=$OPTARG;;
@@ -132,8 +136,14 @@ source $study_cfg
 
 
 #add checks here to ensure all required variables are set:
+if [ -n "$CUSTOM_BIDS_DIR" ]
+then
+	BIDS_DIR=$CUSTOM_BIDS_DIR
+else
+
 if [ ! -n "$BIDS_DIR" ]
 then
+
 	#if BIDS_DIR not defined, then set it based on $study_cfg
 	cfg_name=${study_cfg##*/}
 	pi_name=${cfg_name%%_*}
@@ -141,6 +151,10 @@ then
 
 	BIDS_DIR=$AUTOBIDS_DATA/$pi_name/$study_name
 	echo "Using default BIDS_DIR=$BIDS_DIR"
+
+	
+fi
+
 fi
 
 
