@@ -3,7 +3,6 @@
 # Line below locks the script so cannot be run simultaneously (i.e. to prevent conflicts)
 [ "${FLOCKER}" != "$0" ] && exec env FLOCKER="$0" flock -en "$0" "$0" "$@" || :
 
-
 CONFIG_DCM_RETRIEVE=$AUTOBIDS_DIR/cfg/dicom-retrieve.cfg
 #load in CONFIG_DCM_RETRIEVE file
 if [ -e $CONFIG_DCM_RETRIEVE  ]
@@ -44,18 +43,18 @@ scratch_dir=/scratch/$USER/incoming_$RANDOM
 #download tarballs for all studies
 if [ -n "$custom_PI" ]
 then
-	studies=$custom_PI
+	study="${custom_PI}*"
 else
-	studies=`$AUTOBIDS_DIR/etc/getListStudies`
+	study="*"
 fi
 
-for study in $studies
-do
- 
- echo Retrieving dicoms for ${study}* on ${date}... | tee -a $LOG
- getDicomTarballs \'${study}*\' \'${date}\' $scratch_dir | tee -a $LOG
+ echo "study: $study"
+ echo "date: $date"
+ echo Retrieving dicoms for \'${study}\' on ${date}... | tee -a $LOG
+ getDicomTarballs \'${study}\' \'${date}\' $scratch_dir | tee -a $LOG
 
-done
+
+
 
 #process each individually
 count=`ls -1 $scratch_dir/*.tar 2> /dev/null  | wc -l `

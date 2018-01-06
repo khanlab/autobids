@@ -83,7 +83,7 @@ DICOMS_DIR=$OUTPUT_DIR/dicoms
 mkdir -p $OUTPUT_DIR $DICOMS_DIR
 
 #singularity image defined in CONFIG_DCM_RETRIEVE file
-(($SINGULARITY_IMG \
+((singularity run $SINGULARITY_OPTS $SINGULARITY_IMG \
 ${UWO_USERNAME} \
 ${UWO_PASSWORD} \
 ${CONNECT} \
