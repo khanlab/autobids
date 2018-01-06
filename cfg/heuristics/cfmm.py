@@ -389,7 +389,7 @@ def infotodict(seqinfo):
         if ('Movie' in (s.series_description).strip()):
             if (s.dim4==1 and  'SBRef' in (s.series_description).strip()):
                     info[movie_sbref].append({'item': s.series_id})
-            else:
+            elif (s.dim4>1):
                     info[movie].append({'item': s.series_id})
 
         
@@ -397,10 +397,10 @@ def infotodict(seqinfo):
             if ('mbep2d' in (s.series_description).strip() or 'ep_bold' in (s.series_description).strip() ):
                 if (s.dim4==1 and  'SBRef' in (s.series_description).strip()):
                     info[rest_sbref].append({'item': s.series_id})
-                else:
+                elif (s.dim4>1):
                     info[rest].append({'item': s.series_id})
  
-            if ('mi_ep2d' in (s.series_description).strip()):
+            if ('mi_ep2d' in (s.series_description).strip() and s.dim4>1):
                 if ('DICO'  in (s.image_type[4].strip())):
                     info[rest_psf_dico].append({'item': s.series_id})
                 else:
