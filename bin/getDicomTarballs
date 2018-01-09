@@ -20,30 +20,58 @@
 
 function usage { 
 
-  echo "Retrieves studies based on StudyDescription & Date.  If date not provided, all studies are downloaded"
-  echo "Uses credentials in ~/.uwo_credentials or prompts for username/password" 
+  echo "Retrieves studies from dicom server based on Principal^Project, Date and/or PatientName.  If no search strings provided, all studies are downloaded"
+  echo "Uses credentials in ~/.uwo_credentials (line1: username, line2: password)  or prompts for username/password" 
   echo ""
-  echo "Usage: `basename $0` '<studydesc-search>' '<date-search>' <output folder>  <optional flags>"
-  echo "	Example (all scans on specific date): `basename $0` 'Khan*' '20170530' myfolder"
-  echo "	Example (all scans since date): `basename $0` 'Khan*' '20170530-' myfolder"
-  echo "	Example (all scans in date range): `basename $0` 'Khan^NeuroAnalytics' '20170530-20170827' myfolder"
-  echo "	Example (all scans in all dates): `basename $0` 'Khan*' '-' myfolder"
+  echo "Usage: `basename $0` <search options>  <output folder> "
+  echo "    Search Options:  "
+  echo "	-n 'PatientName'"
+  echo "	-p 'Principal^Project'"
+  echo "	-d 'Date'"
+  echo ""
+  echo "	Example (all scans on specific date): `basename $0` -d '20170530' myfolder"
+  echo "	Example (all scans since date): `basename $0` -d '20170530-' myfolder"
+  echo "	Example (all scans in date range): `basename $0` -d '20170530-20170827' myfolder"
+  echo "	Example (specific Principal^Project on all dates): `basename $0` -p 'Khan^NeuroAnalytics'  myfolder"
+  echo "	Example (specific PatientName searc): `basename $0` -n '*subj01*'  myfolder"
+
 
 }
 
 
-if [ "$#" -lt 3 ]
+# new usage to be:
+# -d (YYYYMMDD - default '-')
+# -n (PatientName - default '*')
+# -p (Principal^Project - default '*')
+DATE_SEARCH=\'-\'
+STUDY_SEARCH=\'*\'
+NAME_SEARCH=\'*\'
+
+AUTO_DL=0
+
+while getopts "d:n:p:A" options; do
+ case $options in
+    d ) DATE_SEARCH=$OPTARG;;
+    n ) NAME_SEARCH=$OPTARG;;
+    p ) STUDY_SEARCH=$OPTARG;;
+    A ) AUTO_DL=1;;
+    * ) usage
+	exit 1;;
+ esac
+done
+
+shift $((OPTIND-1))
+
+if [ "$#" -lt 1 ]
 then
 	usage
 	exit 1
 fi
 
 
-STUDY_SEARCH=$1
-DATE_SEARCH=$2
-OUTPUT_DIR=$3
+OUTPUT_DIR=$1
 
-shift 3
+shift 1 
 #UWO credentials: need to login dicom.cfmm.robarts.ca
 UWO_CREDNTIALS=~/.uwo_credentials
 
@@ -77,13 +105,20 @@ then
 	touch ${DOWNLOADED_UID_LIST}
 fi
 
+if [ "$AUTO_DL" = 0 ]
+then
+  DL_LIST=''
+else
+  DL_LIST=$DOWNLOADED_UID_LIST
+fi
 
 
 DICOMS_DIR=$OUTPUT_DIR/dicoms
 mkdir -p $OUTPUT_DIR $DICOMS_DIR
 
 #singularity image defined in CONFIG_DCM_RETRIEVE file
-((singularity run $SINGULARITY_OPTS $SINGULARITY_IMG \
+((singularity exec $SINGULARITY_OPTS $SINGULARITY_IMG \
+${RETRIEVE_SCRIPT} \
 ${UWO_USERNAME} \
 ${UWO_PASSWORD} \
 ${CONNECT} \
@@ -92,4 +127,5 @@ ${DICOMS_DIR} \
 ${KEEP_SORTED_DICOM} \
 ${OUTPUT_DIR} \
 ${DATE_SEARCH} \
-${DOWNLOADED_UID_LIST}  3>&1 1>&2 2>&3 | grep -E -v "^Picked up _JAVA_OPTIONS:|^tar: Removing leading")  3>&1 2>&1  )
+${NAME_SEARCH} \
+${DL_LIST}  3>&1 1>&2 2>&3 | grep -E -v "^Picked up _JAVA_OPTIONS:|^tar: Removing leading")  3>&1 2>&1  )

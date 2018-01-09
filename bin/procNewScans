@@ -51,7 +51,7 @@ fi
  echo "study: $study"
  echo "date: $date"
  echo Retrieving dicoms for \'${study}\' on ${date}... | tee -a $LOG
- getDicomTarballs \'${study}\' \'${date}\' $scratch_dir | tee -a $LOG
+ getDicomTarballs -p \'${study}\' -d \'${date}\' -A $scratch_dir | tee -a $LOG
 
 
 
