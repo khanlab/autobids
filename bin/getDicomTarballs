@@ -51,9 +51,9 @@ AUTO_DL=0
 
 while getopts "d:n:p:A" options; do
  case $options in
-    d ) DATE_SEARCH=$OPTARG;;
-    n ) NAME_SEARCH=$OPTARG;;
-    p ) STUDY_SEARCH=$OPTARG;;
+    d ) DATE_SEARCH=\'$OPTARG\';;
+    n ) NAME_SEARCH=\'$OPTARG\';;
+    p ) STUDY_SEARCH=\'$OPTARG\';;
     A ) AUTO_DL=1;;
     * ) usage
 	exit 1;;
@@ -105,9 +105,9 @@ then
 	touch ${DOWNLOADED_UID_LIST}
 fi
 
-if [ "$AUTO_DL" = 0 ]
+if [ "$AUTO_DL" = "0" ]
 then
-  DL_LIST=''
+  DL_LIST=
 else
   DL_LIST=$DOWNLOADED_UID_LIST
 fi
