@@ -218,7 +218,7 @@ def infotodict(seqinfo):
 
              dwi:[],dwi_sbref:[],
 
-             fmap_PA:[],fmap_PA_sbref:[],fmap_diff:[],fmap_magnitude:[],
+             fmap_diff:[],fmap_magnitude:[],
 
              
              dir_t2:[], DIS2D_dir_t2:[]}
