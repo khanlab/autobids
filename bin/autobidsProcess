@@ -286,6 +286,9 @@ do
 	echo $subjid >> $subjlist
 done
 
+#sort and remove duplicate entries in subjlist
+sort -u $subjlist -o $subjlist
+
 
 pushd $code_dir > /dev/null
 
