@@ -3,7 +3,7 @@
 SUBJ_EXPR=*_{subject}  #search string for patientname
 
 
-HEURISTIC=$AUTOBIDS_DIR/cfg/heuristics/PS_PRC_3T.py
+HEURISTIC=$AUTOBIDS_DIR/cfg/heuristics/cfmm_PS_PRC_3T.py
 
 DCM2BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/heudiconv_bids
 PRE_BIDS_PIPELINE=$AUTOBIDS_DIR/pipelines/tuneup_bids
