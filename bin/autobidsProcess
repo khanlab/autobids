@@ -203,7 +203,7 @@ echo "STUDY_CFG: $study_cfg"
 echo "BIDS_DIR: $BIDS_DIR"
 echo ""
 
-
+VALIDATOR=$AUTOBIDS_DIR/pipelines/bids-validator
 
 if [ "$single_subj" = "0" -a -e $BIDS_DIR ]
 then
@@ -325,9 +325,8 @@ else
 job_prebids=$job_dcm2bids
 fi
 
-#run bids-validator,  but wait for it to finish to send a confirmation e-mail (depends on heudiconv and prebids finishing)
-echo neurogliaSubmit -j ShortSkinny -d afterany:$job_prebids bids-validator $BIDS_DIR --verbose \> $validator_out 
-job_validator=$(neurogliaSubmit  -j ShortSkinny -d afterany:$job_prebids bids-validator $BIDS_DIR --verbose \> $validator_out )
+#run bids-validator, but wait for it to finish to send a confirmation e-mail (depends on heudiconv and prebids finishing)
+job_validator=$($VALIDATOR $BIDS_DIR $validator_out afterany:$job_prebids)
 
 
 #postbids pipeline (to run on validated bids datasets) is optional:
