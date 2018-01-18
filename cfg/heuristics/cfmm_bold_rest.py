@@ -20,8 +20,8 @@ def infotodict(seqinfo):
     rest = create_key('sub-{subject}/func/sub-{subject}_task-rest_run-{item:02d}_bold')
     rest_sbref = create_key('sub-{subject}/func/sub-{subject}_task-rest_run-{item:02d}_sbref')
 
-    rest_psf = create_key('sub-{subject}/func/sub-{subject}_acq-psf_task-rest_run-{item:02d}_bold')
-    rest_psf_dico = create_key('sub-{subject}/func/sub-{subject}_acq-psf_task-rest_run-{item:02d}_rec-dico_bold')
+    rest_psf = create_key('sub-{subject}/func/sub-{subject}_task-rest_acq-psf_run-{item:02d}_bold')
+    rest_psf_dico = create_key('sub-{subject}/func/sub-{subject}_task-rest_acq-psf_rec-dico_run-{item:02d}_bold')
 
     movie = create_key('sub-{subject}/func/sub-{subject}_task-movie_run-{item:02d}_bold')
     movie_sbref = create_key('sub-{subject}/func/sub-{subject}_task-movie_run-{item:02d}_sbref')
