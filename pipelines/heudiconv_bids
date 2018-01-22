@@ -25,7 +25,7 @@ while getopts "f:d:" options; do
   esac
 done
 
-SINGULARITY_IMG=/project/6007967/akhanf/singularity/akhanf_heudiconv_0.4.2.img
+SINGULARITY_IMG=/project/6007967/akhanf/singularity/khanlab-heudiconv-master-0.4.3.simg
 #SINGULARITY_IMG=shub://akhanf/heudiconv
 #SINGULARITY_IMG=/scratch/akhanf/akhanf-heudiconv-master.simg
 
