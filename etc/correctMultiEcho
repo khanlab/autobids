@@ -27,13 +27,16 @@ do
 
 	subj=${subj##sub-} #strip off sub- if it exists, to make consistent
 
+	
 	$exec_path/meGRE_bids_corrector.py $in_bids/sub-$subj/anat
 
+	#fix ImagingFrequency by getting from another json file
+	match=`grep ImagingFrequency $in_bids/sub-$subj/anat/*.json | head -n 1`
+	freq=${match##*:\ }
+	freq=${freq%%,*}
 
-#	if [ -e $in_bids/derivatives/distortion_corrected/sub-$subj/anat ]
-#	then
-#	$exec_path/meGRE_bids_corrector.py $in_bids/derivatives/distortion_corrected/sub-$subj/anat
-#	fi
+	$exec_path/fixImFreq_json.py $in_bids/sub-$subj/anat $freq
+
 
 	$exec_path/memp2rage_bids_corrector.py $in_bids/sub-$subj/anat
 done
