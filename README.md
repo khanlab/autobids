@@ -10,22 +10,19 @@ Automated Dicom to BIDS and pipelines using compute canada
 
 ## Install:
 
-Clone the autobids repository to your home directory:
+Copy and paste the following code block to:
+* Clone the autobids repository to your home directory
+* Create a folder in your project space for your bids data
+* Set-up your bashrc
 ```
 git clone http://github.com/khanlab/autobids ~/autobids
-```
-
-Create a folder in your project space for your bids data:
-```
 mkdir -p ~/projects/rrg-akhanf/$USER/bids
-```
-
-Run the following to set-up your environment (re-login afterwards):
-```
 echo "export AUTOBIDS_DIR=~/autobids   #this repository" >> ~/.bashrc
 echo "export AUTOBIDS_DATA=~/projects/rrg-akhanf/$USER/bids" >> ~/.bashrc
 echo "export PATH=$AUTOBIDS_DIR/bin:$PATH" >> ~/.bashrc
 ```
+Note: you need to re-login after performing this step.
+
 
 ## Config files:
 
