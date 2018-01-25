@@ -215,10 +215,18 @@ code_dir=$BIDS_DIR/code
 sourcedata=$BIDS_DIR/sourcedata
 mkdir -p $code_dir $sourcedata
 
-datestring=`date +%Y-%m-%d_%H.%M`
-subjlist=$code_dir/subjects-list_${datestring}.txt
-validator_out=$code_dir/bids-validator_${datestring}.txt
-heudiconv_out=$code_dir/heudiconv_${datestring}
+datestring=`date +%Y-%m-%d_%I%p`
+log_dir=$code_dir/autobids_$datestring
+if [ -e $log_dir ]
+then 
+ log_dir=${log_dir}_`date +%M`
+fi
+
+mkdir -p $log_dir
+
+subjlist=$log_dir/subjects-list.txt
+validator_out=$log_dir/bids-validator.txt
+heudiconv_out=$log_dir/heudiconv
 
 # parse tarfile names to get subjids
 for tar in $in_tar
@@ -290,7 +298,7 @@ done
 sort -u $subjlist -o $subjlist
 
 
-pushd $code_dir > /dev/null
+pushd $log_dir > /dev/null
 
 if [ "$testmode" = 1 ]
 then
@@ -309,11 +317,7 @@ fi
 #dicom conversion is optional 
 if [ -n "$DCM2BIDS_PIPELINE" -a -n "$HEURISTIC" ]
 then
-job_dcm2bids=$($DCM2BIDS_PIPELINE $BIDS_DIR $subjlist -f $HEURISTIC -d $dicom_expr )
-
-
-#move .heudiconv after done
-job_heudimove=$(regularSubmit -j Quick -N heudi-mv -d afterany:$job_dcm2bids "mv $BIDS_DIR/.heudiconv $heudiconv_out")
+job_dcm2bids=$($DCM2BIDS_PIPELINE $BIDS_DIR $subjlist -f $HEURISTIC -d $dicom_expr -L $heudiconv_out )
 
 
 #prebids pipeline (to create a "more" valid bids dataset) is optional:
