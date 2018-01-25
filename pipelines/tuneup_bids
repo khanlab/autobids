@@ -26,10 +26,11 @@ then
 	depends_arg="-d $depends"
 fi
 
+#SINGULARITY_IMG=`shub-cache shub://akhanf/vasst-dev:v0.0.2`
+SINGULARITY_IMG=/project/6007967/akhanf/singularity/akhanf-vasst-dev-master-v0.0.2.simg
 
-SINGULARITY_IMG=/project/6007967/akhanf/singularity/khanlab_neuroglia-vasst-dev_0.0.2e.img
 
-jobid_fmap=$(neurogliaSubmit  $depends_arg  -j Quick $AUTOBIDS_DIR/etc/correctFieldMap $bids_dir $subjlist )
+jobid_fmap=$(neurogliaSubmit  $depends_arg -N correctFieldMap -j Quick $AUTOBIDS_DIR/etc/correctFieldMap $bids_dir $subjlist )
 jobid_multiecho=$(regularSubmit  $depends_arg -j Quick $AUTOBIDS_DIR/etc/correctMultiEcho $bids_dir $subjlist )
 jobid_tsv=$(regularSubmit -d afterany:$jobid_fmap:$jobid_multiecho -j Quick $AUTOBIDS_DIR/etc/cleanParticipantsFile $bids_dir )
 

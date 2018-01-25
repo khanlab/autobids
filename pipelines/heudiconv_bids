@@ -2,7 +2,7 @@
 
 function usage {
 
-echo "Usage: $0 <bids> <subjlist>  -f <heuristic> -d <input_dicom_expr> "
+echo "Usage: $0 <bids> <subjlist>  -f <heuristic> -d <input_dicom_expr> -L <output_log_dir>"
 
 }
 
@@ -16,21 +16,33 @@ bids_dir=$1
 subjlist=$2
 shift 2
 
-while getopts "f:d:" options; do
+log_dir=
+
+while getopts "f:d:L:" options; do
  case $options in
   f ) heuristic=$OPTARG;;
   d ) input_string=$OPTARG;;
+  L ) log_dir=$OPTARG;;
   * ) usage
       exit 1;;
   esac
 done
 
-SINGULARITY_IMG=/project/6007967/akhanf/singularity/akhanf_heudiconv_0.4.2.img
-#SINGULARITY_IMG=shub://akhanf/heudiconv
-#SINGULARITY_IMG=/scratch/akhanf/akhanf-heudiconv-master.simg
+
+
+#SINGULARITY_IMG=`shub-cache shub://khanlab/heudiconv:0.4.2`
+SINGULARITY_IMG=/project/6007967/akhanf/singularity/khanlab-heudiconv-master-0.4.2.simg
 
 #SCRATCH_DIR is set by neurogliaBatch inside jobfile
 job_dcm2bids=$(neurogliaBatch  heudiconv $subjlist -b "--tempdir \$SCRATCH_DIR -b -d ${input_string} -o $bids_dir -f $heuristic -s" -j 2core8gb )
 
+
+if [ -n "$log_dir" ]
+then
+job_heudimove=$(regularSubmit -j Quick -N heudi-mv -d afterany:$job_dcm2bids "mv $bids_dir/.heudiconv $log_dir")
+echo $job_heudimove
+else
 echo $job_dcm2bids
+fi
+
 exit 0
