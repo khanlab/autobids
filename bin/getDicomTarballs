@@ -48,13 +48,15 @@ STUDY_SEARCH=\'*\'
 NAME_SEARCH=\'*\'
 
 AUTO_DL=0
+UWO_CREDNTIALS=~/.uwo_credentials
 
-while getopts "d:n:p:A" options; do
+while getopts "d:n:p:Ac:" options; do
  case $options in
     d ) DATE_SEARCH=\'$OPTARG\';;
     n ) NAME_SEARCH=\'$OPTARG\';;
     p ) STUDY_SEARCH=\'$OPTARG\';;
     A ) AUTO_DL=1;;
+    c ) UWO_CREDNTIALS=$OPTARG;;
     * ) usage
 	exit 1;;
  esac
@@ -72,8 +74,6 @@ fi
 OUTPUT_DIR=$1
 
 shift 1 
-#UWO credentials: need to login dicom.cfmm.robarts.ca
-UWO_CREDNTIALS=~/.uwo_credentials
 
 if [ ! -e $UWO_CREDNTIALS ]
 then
@@ -119,8 +119,8 @@ mkdir -p $OUTPUT_DIR $DICOMS_DIR
 #singularity image defined in CONFIG_DCM_RETRIEVE file
 ((singularity exec $SINGULARITY_OPTS $RETRIEVE_SINGULARITY_IMG \
 ${RETRIEVE_SCRIPT} \
-${UWO_USERNAME} \
-${UWO_PASSWORD} \
+'${UWO_USERNAME}' \
+'${UWO_PASSWORD}' \
 ${CONNECT} \
 ${STUDY_SEARCH} \
 ${DICOMS_DIR} \
