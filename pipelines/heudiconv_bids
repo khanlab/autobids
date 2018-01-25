@@ -29,9 +29,8 @@ while getopts "f:d:L:" options; do
 done
 
 
-
-#SINGULARITY_IMG=`shub-cache shub://khanlab/heudiconv:0.4.2`
-SINGULARITY_IMG=/project/6007967/akhanf/singularity/khanlab-heudiconv-master-0.4.2.simg
+#SINGULARITY_IMG=`shub-cache shub://khanlab/heudiconv:0.4.3`
+SINGULARITY_IMG=/project/6007967/akhanf/singularity/khanlab-heudiconv-master-0.4.3.simg
 
 #SCRATCH_DIR is set by neurogliaBatch inside jobfile
 job_dcm2bids=$(neurogliaBatch  heudiconv $subjlist -b "--tempdir \$SCRATCH_DIR -b -d ${input_string} -o $bids_dir -f $heuristic -s" -j 2core8gb )
