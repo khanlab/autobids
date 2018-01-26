@@ -19,7 +19,7 @@ git clone http://github.com/khanlab/autobids ~/autobids
 mkdir -p ~/projects/rrg-akhanf/$USER/bids
 echo "export AUTOBIDS_DIR=~/autobids   #this repository" >> ~/.bashrc
 echo "export AUTOBIDS_DATA=~/projects/rrg-akhanf/$USER/bids" >> ~/.bashrc
-echo "export PATH=$AUTOBIDS_DIR/bin:$PATH" >> ~/.bashrc
+echo "export PATH=\$AUTOBIDS_DIR/bin:\$PATH" >> ~/.bashrc
 ```
 Note: you need to re-login after performing this step.
 
