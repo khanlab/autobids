@@ -7,7 +7,6 @@ function usage {
 	echo ""
 	echo " Optional arguments:"
 	echo "  -c <study_cfg>: Specify study cfg (default: looks up study_cfg using tar name)"
-	echo "  -k: Keep tar files in original folder (default: move tar files to BIDS/sourcedata)"
 	echo "  -f <subj_expr>: Override {subject} to search within tar filename (default: uses SUBJ_EXPR in study_cfg to search within patient_name)"
 	echo "  -d <bids_dir>: Override custom output BIDS_DIR  (default: uses \$AUTOBIDS_DATA/PI/STUDY )"
 }
@@ -15,7 +14,6 @@ function usage {
 
 testmode=0
 study_cfg=""
-nomove_tar=0
 is_custom_cfg=0
 simplesubjid=0
 TAR_SUBJ_EXPR=
@@ -23,10 +21,8 @@ CUSTOM_BIDS_DIR=
 
 opts="" #options for neuroglia/etc tools
 
-while getopts "c:tkf:d:" options; do
+while getopts "c:tf:d:" options; do
  case $options in
-    k ) echo "	Keeping tar files in original folder" >&2
-	nomove_tar=1;;
     t ) echo "	Using test-mode (no submit jobs)" >&2
 	testmode=1;;
     f ) echo "	Overriding SUBJ_EXPR for tar filename: $OPTARG" >&2
@@ -277,18 +273,15 @@ do
 	fi
 
 
-	#move tar to source data
-	if [ $nomove_tar = 0 -o $testmode = 1 ]
+	#copy tar to source data
+	if [ "$testmode" = 0 ] #only copy if not in test mode
 	then
 		if [ ! -e $sourcedata/$filename ]
 		then
-		mv  $tar $sourcedata
+		cp -v  $tar $sourcedata
 		fi
 		tar_dir=$sourcedata
-	else
-		tar_dir=$folder
 	fi
-
 
 	#compile subjid list
 	echo $subjid >> $subjlist
