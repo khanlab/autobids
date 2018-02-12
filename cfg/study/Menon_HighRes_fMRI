@@ -1,7 +1,7 @@
 #!/bin/bash
 
-BIDS_DIR=$AUTOBIDS_DATA/Olivia/GEvSE
-SUBJ_EXPR=*[xX]_{subject}  #search string in patient_name
+BIDS_DIR=$AUTOBIDS_DATA/Menon/GEvSE
+SUBJ_EXPR=*GEvSE_{subject}  #search string in patient_name
 
 HEURISTIC=$AUTOBIDS_DIR/cfg/heuristics/GEvSE.py
 
