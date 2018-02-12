@@ -101,10 +101,6 @@ def infotodict(seqinfo):
     info[task_ge]=[]
     info[task_ge_phase]=[]
 
-    print(phaseacq)
-    print(magtimes)
-    print(phaseind)
-
     for i in xrange(len(semagtimes)):
         print(i)
         info[task_se].append(seinfo[i])
