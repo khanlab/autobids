@@ -26,8 +26,8 @@ then
 	depends_arg="-d $depends"
 fi
 
-#SINGULARITY_IMG=`shub-cache shub://akhanf/vasst-dev:v0.0.2`
-SINGULARITY_IMG=/project/6007967/akhanf/singularity/akhanf-vasst-dev-master-v0.0.2.simg
+SINGULARITY_IMG=`shub-cache shub://akhanf/vasst-dev:v0.0.2`
+#SINGULARITY_IMG=/project/6007967/akhanf/singularity/akhanf-vasst-dev-master-v0.0.2.simg
 
 
 jobid_fmap=$(neurogliaSubmit  $depends_arg -N correctFieldMap -j Quick $AUTOBIDS_DIR/etc/correctFieldMap $bids_dir $subjlist )
