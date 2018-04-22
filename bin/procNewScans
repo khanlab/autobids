@@ -3,15 +3,16 @@
 # Line below locks the script so cannot be run simultaneously (i.e. to prevent conflicts)
 [ "${FLOCKER}" != "$0" ] && exec env FLOCKER="$0" flock -en "$0" "$0" "$@" || :
 
-CONFIG_DCM_RETRIEVE=$AUTOBIDS_DIR/cfg/dicom-retrieve.cfg
-#load in CONFIG_DCM_RETRIEVE file
-if [ -e $CONFIG_DCM_RETRIEVE  ]
-then
-	source $CONFIG_DCM_RETRIEVE
-else
-	echo "ERROR: $CONFIG_DCM_RETRIEVE not found!"
-	exit 1
-fi
+
+#log directory for retrieval, new file generated each day
+RETRIEVE_LOG_DIR=$AUTOBIDS_DIR/var/log_retrieve_cfmm
+
+#files for 
+DOWNLOADED_TAR_LIST=$AUTOBIDS_DIR/var/downloaded_tar.txt
+DOWNLOADED_UID_LIST=$AUTOBIDS_DIR/var/downloaded_uid.txt
+
+#incoming dicom tars that do not match up a project are put here:
+INCOMING_TAR_DIR=$AUTOBIDS_DATA/incoming
 
 
 if [ "$#" -lt 1 ]
