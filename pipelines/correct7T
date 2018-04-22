@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#pipeline for running gradient correction & sa2rage+mp2rage B1 correction
+
+bids_dir=$1  		#path to bids dir
+
+if [ "$#" -lt 1 ]
+then
+  echo "Usage: $0 <bids>"
+  exit 0
+fi
+
+
+
+job1=$(bidsBatch gradcorrect_0.0.1d $bids_dir $bids_dir/derivatives/gradcorrect participant)
+job2=$(bidsBatch -d $job1 mp2rage_correction_v0.0.1 $bids_dir/derivatives/gradcorrect $bids_dir/derivatives/mp2ragecorrect participant)
+
+
+
+echo $jobid
+
+exit 0
