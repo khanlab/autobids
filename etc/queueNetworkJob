@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ "$#" -lt 2 ]
+then
+ echo "Wrapper for running a network-enabled command on a compute node with no network access"
+ echo "Adds the command to a job queue that is executed periodically on the login node by an external cron job"
+ echo ""
+ echo Usage: $0 "<command to run on the networked login node>"
+ exit 1
+fi
+
+cmd=$@
+
+
+datestring=`date +%Y-%m-%d_%I%p`
+qfile=$AUTOBIDS_DIR/var/networkjob_queue/autobids_${datestring}_${RANDOM}
+
+
+echo Queuing cmd into $qfile: $cmd 
+echo $cmd > $qfile

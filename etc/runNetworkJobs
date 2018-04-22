@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #compose the command
-jobdir=$AUTOBIDS_DIR/var/globus_queue
+jobdir=$AUTOBIDS_DIR/var/networkjob_queue
 
 for job in `ls -1t $jobdir/* 2> /dev/null`
 do
