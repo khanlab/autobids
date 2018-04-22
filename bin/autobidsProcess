@@ -46,6 +46,8 @@ then
 fi
 
 
+nscans=$#
+
 if [ "$#" -gt 1 ]
 then
 	single_subj=0
@@ -212,8 +214,17 @@ BIDS_DIR=`realpath $BIDS_DIR`
 pushd $BIDS_DIR/code
 
 #submit tar2bids job here
-# if run on SLURM:
-job_tar2bids=$(regularSubmit $opts -j Short tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 8 -w \$SLURM_TMPDIR  -C $in_tar)
+# if run on SLURM, request number of cores based on number of scans to convert
+if [ $nscans -lt 16 ]
+then
+job_tar2bids=$(regularSubmit $opts -j 8core32gb3h tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 8 -w \$SLURM_TMPDIR  -C $in_tar)
+elif [ $nscans -lt 32 ]
+then
+job_tar2bids=$(regularSubmit $opts -j 16core64gb3h tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 16 -w \$SLURM_TMPDIR  -C $in_tar)
+else
+job_tar2bids=$(regularSubmit $opts -j 32core128gb3h tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 32 -w \$SLURM_TMPDIR  -C $in_tar)
+fi
+
 
 # if run local: 
 # tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 8 -w $SLURM_TMPDIR -C  $in_tar
@@ -235,12 +246,18 @@ then
 job_postproc=$(regularSubmit -j Quick -d afterany:$job_tar2bids $POST_BIDS_PIPELINE $BIDS_DIR)
 
 
-if [ -n "$GLOBUS_BIDS_ENDPOINT" ]
-then
-regularSubmit -j Quick -d afterany:$job_postproc -N syncpostproc $AUTOBIDS_DIR/etc/queueGlobusBIDS $BIDS_DIR $GLOBUS_BIDS_ENDPOINT --label ${study_cfg##*/}
-fi
+#could use this to get subjlist, but need to wait until it's created first:  `ls -1t $BIDS_DIR/code/tar2bids_*/subjects-list | head -n 1` 
 
-#could use this to get subjlist, but need to wait until it's created first..  `ls -1t $BIDS_DIR/code/tar2bids_*/subjects-list | head -n 1` 
+
+# for globus sync, could maintain a database of bids-dirs and corresponding globus-endpoints -- then could build sync into bidsBatch; also could be a mechanism for provenance
+
+
+
+#if [ -n "$GLOBUS_BIDS_ENDPOINT" ]
+#then
+#regularSubmit -j Quick -d afterany:$job_postproc -N syncpostproc $AUTOBIDS_DIR/etc/queueGlobusBIDS $BIDS_DIR $GLOBUS_BIDS_ENDPOINT --label ${study_cfg##*/}
+#fi
+
 
 fi
 
