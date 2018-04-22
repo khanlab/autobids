@@ -1,7 +1,6 @@
 #!/bin/bash
 
-
-autobids_cfg=$AUTOBIDS_DIR/cfg/study
+autobids_cfg=$AUTOBIDS_STUDY_CFG_DIR
 
 pushd $autobids_cfg > /dev/null
 ls -d * | awk -F '_' '{print $1}' | uniq

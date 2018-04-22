@@ -8,7 +8,7 @@ then
 fi
 
 #env var:
-autobids_cfg=$AUTOBIDS_DIR/cfg/study
+autobids_cfg=$AUTOBIDS_STUDY_CFG_DIR
 
 #input is a tar file from dicom server
 in=$1
