@@ -1,6 +1,1 @@
-#!/bin/bash
-
-
-cfmm2tar_img=`shub-cache shub://khanlab/cfmm2tar:latest`
-
-singularity run $SINGULARITY_OPTS $cfmm2tar_img $@
+cfmm2tar
