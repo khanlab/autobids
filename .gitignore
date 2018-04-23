@@ -1,4 +1,5 @@
 cfg/heuristics/*.pyc
 var/*.txt
 var/log_retrieve_cfmm/*.txt
-var/globus_queue/*
+var/networkjob_queue/*
+var/mail/*

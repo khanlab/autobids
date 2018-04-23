@@ -230,10 +230,11 @@ fi
 # tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 8 -w $SLURM_TMPDIR -C  $in_tar
 
 
+
 #use globus to sync to an endpoint after bids conversion (if GLOBUS_BIDS_ENDPOINT exists in study cfg)
-if [ -n "$GLOBUS_BIDS_ENDPOINT" ]
+if [ -n "$EMAIL_NOTIFICATION" -a -n "$GLOBUS_BIDS_ENDPOINT" ]
 then
-regularSubmit -j Quick -d afterany:$job_tar2bids -N syncbids $AUTOBIDS_DIR/etc/queueGlobusBIDS $BIDS_DIR $GLOBUS_BIDS_ENDPOINT --label ${study_cfg##*/}
+	regularSubmit -j Quick -d afterany:$job_tar2bids -N mailnotify $AUTOBIDS_DIR/etc/queueNetworkJob $AUTOBIDS_DIR/etc/mailNotify $EMAIL_NOTIFICATION $BIDS_DIR $GLOBUS_BIDS_ENDPOINT 
 fi
 
 
@@ -249,14 +250,7 @@ job_postproc=$(regularSubmit -j Quick -d afterany:$job_tar2bids $POST_BIDS_PIPEL
 #could use this to get subjlist, but need to wait until it's created first:  `ls -1t $BIDS_DIR/code/tar2bids_*/subjects-list | head -n 1` 
 
 
-# for globus sync, could maintain a database of bids-dirs and corresponding globus-endpoints -- then could build sync into bidsBatch; also could be a mechanism for provenance
-
-
-
-#if [ -n "$GLOBUS_BIDS_ENDPOINT" ]
-#then
-#regularSubmit -j Quick -d afterany:$job_postproc -N syncpostproc $AUTOBIDS_DIR/etc/queueGlobusBIDS $BIDS_DIR $GLOBUS_BIDS_ENDPOINT --label ${study_cfg##*/}
-#fi
+#notification for post-proc TBD
 
 
 fi
