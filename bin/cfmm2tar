@@ -1,6 +1,6 @@
 #!/bin/bash
 
 
-cfmm2tar_img=`shub-cache shub://khanlab/cfmm2tar:latest`
+cfmm2tar_img=`shub-cache shub://khanlab/cfmm2tar:v0.0.1b`
 
 singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $cfmm2tar_img $@
