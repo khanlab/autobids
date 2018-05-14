@@ -51,8 +51,8 @@ done
 if [ ! -e $autocfg ]
 then
 
-	default=$AUTOBIDS_DIR/cfg/study/default
-	autocfg=$AUTOBIDS_DIR/cfg/study/${pi}_${study}
+	default=$AUTOBIDS_STUDY_CFG_DIR/default
+	autocfg=$AUTOBIDS_STUDY_CFG_DIR/${pi}_${study}
 	
 	if [ -e $default ]  
 	then

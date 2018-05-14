@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#pipeline for running gradient correction & sa2rage+mp2rage B1 correction
+
+bids_dir=$1  		#path to bids dir
+
+if [ "$#" -lt 1 ]
+then
+  echo "Usage: $0 <bids>"
+  exit 0
+fi
+
+
+
+
+job1=$(bidsBatch gradcorrect_0.0.1g $bids_dir $bids_dir/derivatives/gradcorrect participant)
+
+#this submits a job when gradcorrect is done, which then runs bidsBatch (needed since bidsBatch requires the input dataset to be complete when the job is run)
+job2=$(regularSubmit -j Quick -d afterany:$job1 bidsBatch mp2rage_correction_v0.0.2 $bids_dir/derivatives/gradcorrect $bids_dir/derivatives/mp2ragecorrect participant)
+job3=$(regularSubmit -j Quick -d afterany:$job1 bidsBatch mriqc_0.10.2 $bids_dir/derivatives/gradcorrect $bids_dir/derivatives/mriqc participant)
+
+
+#problem with dependencies, since end of mp2rage_correction job is not monitored
+echo $job2
+
+exit 0
