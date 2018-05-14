@@ -18,7 +18,6 @@ simplesubjid=0
 TAR_SUBJ_EXPR=
 CUSTOM_BIDS_DIR=
 
-
 opts="" #options for neuroglia/etc tools
 
 while getopts "c:tf:d:" options; do
@@ -225,7 +224,6 @@ else
 job_tar2bids=$(regularSubmit $opts -j 32core128gb3h tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 32 -w \$SLURM_TMPDIR  -C $in_tar)
 fi
 
-
 # if run local: 
 # tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 8 -w $SLURM_TMPDIR -C  $in_tar
 
@@ -234,7 +232,7 @@ fi
 #use globus to sync to an endpoint after bids conversion (if GLOBUS_BIDS_ENDPOINT exists in study cfg)
 if [ -n "$EMAIL_NOTIFICATION" -a -n "$GLOBUS_BIDS_ENDPOINT" ]
 then
-	regularSubmit -j Quick -d afterany:$job_tar2bids -N mailnotify $AUTOBIDS_DIR/etc/queueNetworkJob $AUTOBIDS_DIR/etc/mailNotify $EMAIL_NOTIFICATION $BIDS_DIR $GLOBUS_BIDS_ENDPOINT 
+	regularSubmit $opts -j Quick -d afterany:$job_tar2bids -N mailnotify $AUTOBIDS_DIR/etc/queueNetworkJob $AUTOBIDS_DIR/etc/mailNotify $EMAIL_NOTIFICATION $BIDS_DIR $GLOBUS_BIDS_ENDPOINT 
 fi
 
 
@@ -244,10 +242,7 @@ if [ -n "$POST_BIDS_PIPELINE" ]
 then
 
 #submit a job that will submit the post-bids-pipeline when bids is ready.. (since bidsBatch requires the participants.tsv to exist at submission time)
-job_postproc=$(regularSubmit -j Quick -d afterany:$job_tar2bids $POST_BIDS_PIPELINE $BIDS_DIR)
-
-
-#could use this to get subjlist, but need to wait until it's created first:  `ls -1t $BIDS_DIR/code/tar2bids_*/subjects-list | head -n 1` 
+job_postproc=$(regularSubmit $opts -j Quick -d afterany:$job_tar2bids $POST_BIDS_PIPELINE $BIDS_DIR )
 
 
 #notification for post-proc TBD
