@@ -15,13 +15,14 @@ DOWNLOADED_UID_LIST=$AUTOBIDS_DIR/var/downloaded_uid.txt
 INCOMING_TAR_DIR=$AUTOBIDS_DATA/incoming
 
 
-if [ "$#" -lt 1 ]
+if [ "$#" -lt 2 ]
 then
-	echo "Usage: $0 <date-string> <optional: PI name (default loops through all)>"
+	echo "Usage: $0 <date-string> <cred_id, e.g. ~/uwo_credentials.{cred_id} > <optional: PI name (default loops through all)>"
 	exit 1
 fi
 
 date=$1
+cred_id=$2
 
 #if [ "$#" -lt 1 ]
 #then
@@ -30,9 +31,15 @@ date=$1
 #    date=$1
 #fi
 
-if [ "$#" -gt 1 ]
+if [ "$#" -gt 2 ]
 then
-	custom_PI=$2
+	custom_PI=$3
+fi
+
+if [ "$cred_id" = "bd" ]
+then
+	#this is a bidsdump projectfile, so make it unreadable to all except current user
+	umask -S go-rwx
 fi
 
 mkdir -p $RETRIEVE_LOG_DIR
@@ -53,7 +60,8 @@ fi
  echo "date: $date"
  echo "Retrieving dicoms for '${study}' on '${date}'..." | tee -a $LOG
 
- getDicomTarballs -p "'${study}'" -d "'${date}'" -A $scratch_dir | tee -a $LOG
+  echo "getDicomTarballs -c ~/.uwo_credentials.${cred_id} -p "'${study}'" -d "'${date}'" -U $DOWNLOADED_UID_LIST  $scratch_dir | tee -a $LOG"
+  getDicomTarballs -c ~/.uwo_credentials.${cred_id} -p "'${study}'" -d "'${date}'" -U $DOWNLOADED_UID_LIST  $scratch_dir | tee -a $LOG
 
 
 
@@ -67,12 +75,14 @@ do
   tar_name=${tar##*/}
   uid_file=${tar%%.tar}.uid
   uid=`cat $uid_file`
-  
+ 
   PI=${tar_name%%_*}
   mkdir -p $INCOMING_TAR_DIR/$PI
 
+
   if [ ! $(grep ${tar_name} $DOWNLOADED_TAR_LIST) ]
   then
+
 	  autobidsProcess $tar
 	  if [ "$?" = 0 ]
 	  then
@@ -81,13 +91,6 @@ do
 		#tar does not map to an existing study-uid
 		echo "autobidsProcess failed for $tar_name" | tee -a $LOG
   	 fi
-		#if tarfile not moved to project folder, then move to incoming
-		 if [ -e $tar ]
-		then
-			echo "  Moving $tar_name to $INCOMING_TAR_DIR/$PI" | tee -a $LOG
-			mv -v $tar $INCOMING_TAR_DIR/$PI
-			mv -v $uid_file $INCOMING_TAR_DIR/$PI
-		fi
 
 
 	 	#in either case, add to downloaded list so does not re-download
