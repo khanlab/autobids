@@ -17,10 +17,12 @@ is_custom_cfg=0
 simplesubjid=0
 TAR_SUBJ_EXPR=
 CUSTOM_BIDS_DIR=
+is_bidsdump=0
+
 
 opts="" #options for neuroglia/etc tools
 
-while getopts "c:tf:d:" options; do
+while getopts "c:tf:d:b" options; do
  case $options in
     t ) echo "	Using test-mode (no submit jobs)" >&2
 	opts="$opts -t";;
@@ -31,6 +33,10 @@ while getopts "c:tf:d:" options; do
     c ) echo "  Using custom study_cfg: $OPTARG" >&2
 	is_custom_cfg=1
 	study_cfg=$OPTARG;;
+    b ) echo "  Using bidsdump settings (i.e. private location)"
+	    echo "Setting umask -S go-rwx" >&2
+	    umask -S go-rwx >&2
+	    is_bidsdump=1;;
     * ) usage
 	exit 1;;
  esac
@@ -151,9 +157,14 @@ then
 	pi_name=${cfg_name%%_*}
 	study_name=${cfg_name##${pi_name}_}
 
+	if [ "$is_bidsdump" = "1" ]
+	then
+	BIDS_DIR=$AUTOBIDS_DATA/private/$pi_name/$study_name
+	else
 	BIDS_DIR=$AUTOBIDS_DATA/$pi_name/$study_name
+	fi
+	
 	echo "Using default BIDS_DIR=$BIDS_DIR"
-
 	
 fi
 
@@ -224,15 +235,24 @@ else
 job_tar2bids=$(regularSubmit $opts -j 32core128gb3h tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 32 -w \$SLURM_TMPDIR  -C $in_tar)
 fi
 
+errorcode=$?
+if [ "$errorcode" != 0 ]
+then
+	echo "Tar2bids job submission failed, errorcode: $errorcode" >&2
+	echo "TODO: try to send e-mail notification?"
+	exit $errorcode
+fi
+
 # if run local: 
 # tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 8 -w $SLURM_TMPDIR -C  $in_tar
-
+sleep 2
 
 
 #use globus to sync to an endpoint after bids conversion (if GLOBUS_BIDS_ENDPOINT exists in study cfg)
 if [ -n "$EMAIL_NOTIFICATION" -a -n "$GLOBUS_BIDS_ENDPOINT" ]
 then
 	regularSubmit $opts -j Quick -d afterany:$job_tar2bids -N mailnotify $AUTOBIDS_DIR/etc/queueNetworkJob $AUTOBIDS_DIR/etc/mailNotify $EMAIL_NOTIFICATION $BIDS_DIR $GLOBUS_BIDS_ENDPOINT 
+	sleep 2
 fi
 
 
@@ -243,9 +263,9 @@ then
 
 #submit a job that will submit the post-bids-pipeline when bids is ready.. (since bidsBatch requires the participants.tsv to exist at submission time)
 job_postproc=$(regularSubmit $opts -j Quick -d afterany:$job_tar2bids $POST_BIDS_PIPELINE $BIDS_DIR )
+sleep 2
 
-
-#notification for post-proc TBD
+#notification for post-proc TBD (since currently unable to get jobid from job that is not yet submitted)
 
 
 fi

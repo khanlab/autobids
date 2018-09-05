@@ -83,21 +83,32 @@ do
   if [ ! $(grep ${tar_name} $DOWNLOADED_TAR_LIST) ]
   then
 
+	if [ "$cred_id" = "bd" ]
+	then
+	  autobidsProcess -b $tar
+	  else
 	  autobidsProcess $tar
+  	fi
 	  if [ "$?" = 0 ]
 	  then
 		echo "autobidsProcess completed without errors: $tar_name" | tee -a $LOG
-   	  else
-		#tar does not map to an existing study-uid
-		echo "autobidsProcess failed for $tar_name" | tee -a $LOG
-  	 fi
 
+	 	#add to downloaded list so does not re-download
 
-	 	#in either case, add to downloaded list so does not re-download
 		echo "	Appending $tar_name to $DOWNLOADED_TAR_LIST" | tee -a $LOG
 		echo "  Appending $uid to $DOWNLOADED_UID_LIST" | tee -a $LOG
 	 	echo $tar_name >> $DOWNLOADED_TAR_LIST
 		echo $uid >> $DOWNLOADED_UID_LIST
+
+
+   	  else
+		#tar does not map to an existing study-uid
+		echo "autobidsProcess failed for $tar_name" | tee -a $LOG
+
+		#dont' add to downloaded list
+  	 fi
+
+
 
   fi
 

@@ -19,7 +19,7 @@ then
 fi
 
 
-gradcorrect_app=grad_correct_0.0.1g
+gradcorrect_app=gradcorrect_0.0.1h
 mp2rage_correction_app=mp2rage_correction_v0.0.2
 
 job1=$(bidsBatch $opts $gradcorrect_app $bids_dir $bids_dir/derivatives/gradcorrect participant)
