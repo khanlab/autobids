@@ -2,4 +2,4 @@ cfg/heuristics/*.pyc
 var/*.txt
 var/log_retrieve_cfmm/*.txt
 var/networkjob_queue/*
-var/mail/*
+var/mail/[0-9]*
