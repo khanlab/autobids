@@ -13,8 +13,13 @@ cmd=$@
 
 
 datestring=`date +%Y-%m-%d_%I%p`
-qfile=$AUTOBIDS_DIR/var/networkjob_queue/autobids_${datestring}_${RANDOM}
+jobqueue=$AUTOBIDS_DIR/var/networkjob_queue
+qfile=$jobqueue/autobids_${datestring}_${RANDOM}
 
+if [ ! -e $jobqueue ]
+then
+mkdir $jobqueue
+fi
 
 echo Queuing cmd into $qfile: $cmd 
 echo $cmd > $qfile

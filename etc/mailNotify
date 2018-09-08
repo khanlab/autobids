@@ -22,6 +22,11 @@ maildir=$AUTOBIDS_DIR/var/mail
 datestring=`date +%Y-%m-%d_%Hh_%Mm`
 body=$maildir/$datestring.${bids##*/}.txt
 
+if [ ! -e $maildir ]
+then
+mkdir $maildir
+fi
+
 echo "BIDS conversion for ${bids##*/} completed for the following participants:" > $body
 for subj in `cat $subjects_txt `
 do
