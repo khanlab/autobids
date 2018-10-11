@@ -13,11 +13,11 @@ fi
 
 
 
-job1=$(bidsBatch gradcorrect_0.0.1h $bids_dir $bids_dir/derivatives/gradcorrect participant)
+job1=$(bidsBatch gradcorrect_0.0.1j $bids_dir $bids_dir/derivatives/gradcorrect participant)
 
 #this submits a job when gradcorrect is done, which then runs bidsBatch (needed since bidsBatch requires the input dataset to be complete when the job is run)
-job2=$(regularSubmit -j Quick -d afterany:$job1 bidsBatch mp2rage_correction_v0.0.2 $bids_dir/derivatives/gradcorrect $bids_dir/derivatives/mp2ragecorrect participant)
-job3=$(regularSubmit -j Quick -d afterany:$job1 bidsBatch mriqc_0.10.2 $bids_dir/derivatives/gradcorrect $bids_dir/derivatives/mriqc participant)
+job2=$(regularSubmit -j Quick -d afterany:$job1 bidsBatch mp2rage_correction_v0.0.3 $bids_dir/derivatives/gradcorrect $bids_dir/derivatives/mp2ragecorrect participant)
+job3=$(regularSubmit -j Quick -d afterany:$job1 bidsBatch mriqc_0.14.2 $bids_dir/derivatives/gradcorrect $bids_dir/derivatives/mriqc participant)
 
 
 #problem with dependencies, since end of mp2rage_correction job is not monitored
