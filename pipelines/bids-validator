@@ -22,8 +22,7 @@ then
 	depends_arg="-d $depends"
 fi
 
-validator_app=`shub-cache shub://khanlab/bids-validator:0.25.0`
-#validator_app=/project/6007967/akhanf/singularity/khanlab-bids-validator-master-0.25.0.simg
+validator_app=`shub-cache docker://bids/validator:0.27.10`
 
 jobid_bidsval=$(neurogliaSubmit  $depends_arg -j Quick -N bids-validator -I $validator_app run $bids_dir \> $out_txt )
 
