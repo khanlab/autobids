@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ "$#" -lt 3 ]
+then
+ echo " Usage: <bids dataset> <data type (e.g. anat, func)>  <file type (e.g. T1w, or dwi)>"
+ echo "   Returns 0 if nii(.gz) exists, non-zero if does not exist"
+ exit 0
+fi
+
+bids=$1
+datatype=$2
+filetype=$3
+
+if [ ! -e $bids ]
+then
+  echo "bids does not exist!"
+  exit -1
+fi
+
+compgen -G ${bids}/sub-*/${datatype}/*${filetype}.nii* ${bids}/sub-*/ses-*/${datatype}/*${filetype}.nii* > /dev/null
+
+
+
+
