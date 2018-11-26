@@ -23,9 +23,9 @@ then
 	opts="-S $subjlist $opts"
 fi
 
-jobid_participant=$(bidsBatch  $opts  mriqc_0.10.0 $bids_dir $bids_dir/derivatives/mriqc participant)
+jobid_participant=$(bidsBatch  $opts  mriqc_0.14.2 $bids_dir $bids_dir/derivatives/mriqc_0.14.2 participant)
 
-jobid_group=$(bidsBatch  -d afterany:$jobid_participant  mriqc_0.10.0 $bids_dir $bids_dir/derivatives/mriqc group)
+jobid_group=$(bidsBatch  -d afterany:$jobid_participant  mriqc_0.14.2 $bids_dir $bids_dir/derivatives/mriqc_0.14.2 group)
 
 
 

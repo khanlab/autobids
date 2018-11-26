@@ -24,7 +24,7 @@ then
 fi
 
 
-jobid=$(bidsBatch $opts fmriprep_1.0.6 $bids_dir $bids_dir/derivatives/fmriprep participant)
+jobid=$(bidsBatch $opts fmriprep_1.1.4 $bids_dir $bids_dir/derivatives/fmriprep_1.1.4 participant)
 
 
 
