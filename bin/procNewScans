@@ -60,7 +60,7 @@ fi
  echo "date: $date"
  echo "Retrieving dicoms for '${study}' on '${date}'..." | tee -a $LOG
 
-  echo "cfmm2tar -c ~/.uwo_credentials.${cred_id} -p "'${study}'" -d "'${date}'" -U $DOWNLOADED_UID_LIST  $scratch_dir | tee -a $LOG"
+  echo "cfmm2tar -c ~/.uwo_credentials.${cred_id} -p '${study}' -d '${date}' -U $DOWNLOADED_UID_LIST  $scratch_dir | tee -a $LOG"
   cfmm2tar -c ~/.uwo_credentials.${cred_id} -p "'${study}'" -d "'${date}'" -U $DOWNLOADED_UID_LIST  $scratch_dir | tee -a $LOG
 
 
