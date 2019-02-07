@@ -1,0 +1,114 @@
+#!/bin/bash
+
+# Line below locks the script so cannot be run simultaneously (i.e. to prevent conflicts)
+[ "${FLOCKER}" != "$0" ] && exec env FLOCKER="$0" flock -en "$0" "$0" "$@" || :
+
+
+#log directory for retrieval, new file generated each day
+RETRIEVE_LOG_DIR=$AUTOBIDS_DIR/var/log_retrieve_cfmm
+
+#files for 
+DOWNLOADED_TAR_LIST=$AUTOBIDS_DIR/var/downloaded_tar.txt
+DOWNLOADED_UID_LIST=$AUTOBIDS_DIR/var/downloaded_uid.txt
+
+#incoming dicom tars that do not match up a project are put here:
+INCOMING_TAR_DIR=$AUTOBIDS_DATA/incoming
+
+
+if [ "$#" -lt 2 ]
+then
+	echo "Usage: $0 <date-string> <cred_id, e.g. ~/uwo_credentials.{cred_id} > <optional: PI name (default loops through all)>"
+	exit 1
+fi
+
+date=$1
+cred_id=$2
+
+#if [ "$#" -lt 1 ]
+#then
+#    date=$(date +'%Y%m%d')
+#else
+#    date=$1
+#fi
+
+if [ "$#" -gt 2 ]
+then
+	custom_PI=$3
+fi
+
+if [ "$cred_id" = "bd" ]
+then
+	#this is a bidsdump projectfile, so make it unreadable to all except current user
+	umask -S go-rwx
+fi
+
+mkdir -p $RETRIEVE_LOG_DIR
+LOG=$RETRIEVE_LOG_DIR/`date +%Y-%m-%d`.txt
+
+
+scratch_dir=/scratch/$USER/incoming_$RANDOM
+
+#download tarballs for all studies
+if [ -n "$custom_PI" ]
+then
+	study="${custom_PI}*"
+else
+	study="*"
+fi
+
+ echo "study: $study"
+ echo "date: $date"
+ echo "Retrieving dicoms for '${study}' on '${date}'..." | tee -a $LOG
+
+  echo "cfmm2tar -c ~/.uwo_credentials.${cred_id} -p '${study}' -d '${date}'   $scratch_dir | tee -a $LOG"
+  cfmm2tar -c ~/.uwo_credentials.${cred_id} -p "'${study}'" -d "'${date}'" $scratch_dir | tee -a $LOG
+
+
+
+
+#process each individually
+count=`ls -1 $scratch_dir/*.tar 2> /dev/null  | wc -l `
+if [ "$count" -gt 0 ]
+then
+for tar in `ls $scratch_dir/*.tar`
+do
+  tar_name=${tar##*/}
+  uid_file=${tar%%.tar}.uid
+  uid=`cat $uid_file`
+ 
+  PI=${tar_name%%_*}
+  mkdir -p $INCOMING_TAR_DIR/$PI
+
+
+
+	if [ "$cred_id" = "bd" ]
+	then
+	  autobidsProcess -b $tar
+	  else
+	  autobidsProcess $tar
+  	fi
+	  if [ "$?" = 0 ]
+	  then
+		echo "autobidsProcess completed without errors: $tar_name" | tee -a $LOG
+
+	 	#add to downloaded list so does not re-download
+		  if [ ! $(grep ${tar_name} $DOWNLOADED_TAR_LIST) ]
+		  then
+
+			echo "	Appending $tar_name to $DOWNLOADED_TAR_LIST" | tee -a $LOG
+			echo "  Appending $uid to $DOWNLOADED_UID_LIST" | tee -a $LOG
+	 		echo $tar_name >> $DOWNLOADED_TAR_LIST
+			echo $uid >> $DOWNLOADED_UID_LIST
+		   fi
+
+   	  else
+		#tar does not map to an existing study-uid
+		echo "autobidsProcess failed for $tar_name" | tee -a $LOG
+
+		#dont' add to downloaded list
+  	 fi
+
+
+done
+fi
+
