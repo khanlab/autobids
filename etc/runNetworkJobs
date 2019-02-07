@@ -2,13 +2,15 @@
 
 #compose the command
 jobdir=$AUTOBIDS_DIR/var/networkjob_queue
+completeddir=$AUTOBIDS_DIR/var/networkjob_completed
+mkdir -p $completeddir
 
 for job in `ls -1t $jobdir/* 2> /dev/null`
 do
 
 	echo "Found job $job, running it:"
 	bash $job
-	rm -f $job
+	mv $job $completeddir
 done
 
 
