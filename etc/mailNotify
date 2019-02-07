@@ -11,7 +11,10 @@ email=$1
 bids=$2
 endpoint=$3
 
-admin=alik@robarts.ca
+#strip of trailing /
+bids=${bids%/}
+
+admin=switt4@uwo.ca
 
 url="https://www.globus.org/app/transfer?origin_id=$endpoint&origin_path=%2F"
 
@@ -49,15 +52,12 @@ echo "For more information on autobids, please see https://github.com/khanlab/au
 
 
 #deal with comma-separated e-mails
-i=1
 for addr in $(echo $email  | sed "s/,/ /g")
 do
+echo "cat $body | mail -s "autobids-cfmm: ${bids##*/} import complete" $addr"
 cat $body | mail -s "autobids-cfmm: ${bids##*/} import complete" $addr
-if [ "$i" -gt 1 ]
-then
+echo "delay 30sec.."
 sleep 30 # to avoid sending mail too quickly..
-fi
-i=$((i+1))
 done
 
 
