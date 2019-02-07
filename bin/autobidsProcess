@@ -157,12 +157,7 @@ then
 	pi_name=${cfg_name%%_*}
 	study_name=${cfg_name##${pi_name}_}
 
-	if [ "$is_bidsdump" = "1" ]
-	then
-	BIDS_DIR=$AUTOBIDS_DATA/private/$pi_name/$study_name
-	else
 	BIDS_DIR=$AUTOBIDS_DATA/$pi_name/$study_name
-	fi
 	
 	echo "Using default BIDS_DIR=$BIDS_DIR"
 	
