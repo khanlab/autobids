@@ -1,6 +1,9 @@
 #!/bin/bash
 
 
+#this can be overriden in study_cfg files
+TAR2BIDS_IMG=`shub-cache docker://khanlab/tar2bids:v0.0.3d`
+
 function usage {
 	echo "Runs dcm2bids, pre-bids, and post-bids pipelines on tar files(s)"
 	echo "Usage $0 <options> <in tar file(s)>"
@@ -18,6 +21,7 @@ simplesubjid=0
 TAR_SUBJ_EXPR=
 CUSTOM_BIDS_DIR=
 is_bidsdump=0
+
 
 
 opts="" #options for neuroglia/etc tools
@@ -68,7 +72,10 @@ then
 		echo "ERROR in $0: study_cfg $study_cfg does not exist!"
 		exit 1
 	fi
-	in_tar=$@
+	for tar in $@
+	do
+		in_tar="$in_tar `realpath $tar`"
+	done
 else
 
 #if study_cfg not specified, then look it up, and make sure it is the same for all tar files..
@@ -222,12 +229,12 @@ pushd $BIDS_DIR/code
 # if run on SLURM, request number of cores based on number of scans to convert
 if [ $nscans -lt 16 ]
 then
-job_tar2bids=$(regularSubmit $opts -j 8core32gb3h tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 8 -w \$SLURM_TMPDIR  -O "--overwrite" -C $in_tar)
+job_tar2bids=$(regularSubmit $opts -N tar2bids -j 8core32gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 8 -w \$SLURM_TMPDIR  -C $in_tar)
 elif [ $nscans -lt 32 ]
 then
-job_tar2bids=$(regularSubmit $opts -j 16core64gb3h tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 16 -w \$SLURM_TMPDIR -O "--overwrite" -C $in_tar)
+job_tar2bids=$(regularSubmit $opts -N tar2bids -j 16core64gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 16 -w \$SLURM_TMPDIR -C $in_tar)
 else
-job_tar2bids=$(regularSubmit $opts -j 32core128gb3h tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 32 -w \$SLURM_TMPDIR -O "--overwrite" -C $in_tar)
+job_tar2bids=$(regularSubmit $opts -N tar2bids -j 32core128gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 32 -w \$SLURM_TMPDIR -C $in_tar)
 fi
 
 errorcode=$?
