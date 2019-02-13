@@ -37,9 +37,9 @@ while getopts "c:tf:d:b" options; do
     c ) echo "  Using custom study_cfg: $OPTARG" >&2
 	is_custom_cfg=1
 	study_cfg=$OPTARG;;
-    b ) echo "  Using bidsdump settings (i.e. private location)"
-	    echo "Setting umask -S go-rwx" >&2
-	    umask -S go-rwx >&2
+    b ) echo "  Using bidsdump settings - currently this option does not do anything differently.."
+#	    echo "Setting umask -S go-rwx" >&2
+#	    umask -S go-rwx >&2
 	    is_bidsdump=1;;
     * ) usage
 	exit 1;;
