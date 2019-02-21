@@ -16,7 +16,7 @@ bids=${bids%/}
 
 admin=switt4@uwo.ca
 
-url="https://www.globus.org/app/transfer?origin_id=$endpoint&origin_path=%2F"
+url="https://app.globus.org/file-manager?origin_id=$endpoint&origin_path=%2F"
 
 validator_txt=`ls -1t $bids/code/*/bids-validator.txt | head -n 1`
 subjects_txt=`ls -1t $bids/code/*/subjects-list.txt | head -n 1`
