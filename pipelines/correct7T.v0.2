@@ -1,0 +1,124 @@
+#!/bin/bash
+
+
+
+#pipeline for running gradient correction & sa2rage+mp2rage B1 correction
+
+function usage {
+
+  echo "autobids script for running standard correction and QC pipelines for 7T. Puts results in <bids_dir>/../$scriptname " 
+  echo " By default: will only process subjects that were most recently imported by autobids"
+  echo "" 
+  echo "Usage: $0 <optional flags: [-a,-o]>  <bids_dir> <... optional arguments for bidsBatch ...>"
+  echo ""
+  echo " optional flags (place these *before* bids_dir):"
+  echo "  -a:  process all subjects, not just most recently imported (note: this will not re-run existing results, remove files first to do that)"
+  echo "  -o <out_dir>:  override output folder"
+  echo ""
+
+
+}
+
+
+scriptname=$0
+scriptname=${scriptname##*/}
+
+
+
+
+if [ "$#" -lt 1 ]
+then
+  usage
+  exit 1
+fi
+
+process_all=0
+out_dir=
+
+while getopts "ao:" options; do
+ case $options in
+    a ) echo "	Running on all subjects" >&2
+	process_all=1;;
+    o ) echo "	Overriding output dir as: $OPTARG"  >&2
+	out_dir=$OPTARG;;
+    * ) usage
+	exit 1;;
+ esac
+done
+
+shift $((OPTIND-1))
+
+
+
+bids_dir=$1  		#path to bids dir
+shift 1 
+opts=$@
+
+if [ "$process_all" = "0" ]
+then
+
+#by default, only run on the most recently submitted subjects
+subjlist=`ls -1t $bids_dir/code/*/subjects-list.txt 2> /dev/null | head -n 1`
+if [ -n "$subjlist" ]
+then
+
+if [ -e $subjlist ]
+then
+	nsubj=`cat $subjlist | wc -l`
+	if [ "$nsubj" = "1" ]
+	then
+		subjid=`cat $subjlist`
+		opts="$opts -s $subjid"
+	else
+		opts="$opts -S $subjlist"
+	fi
+fi
+
+else
+	echo "No subjects-list.txt found in $bids_dir/code/* folder, running on ALL subjects"
+fi
+fi
+
+if [ ! -n "$out_dir" ]
+then
+	out_dir=$bids_dir/../$scriptname
+	echo "Using default output directory: $out_dir"
+fi	
+
+mkdir -p $out_dir
+
+gradcorrect_app=gradcorrect_v0.0.2c
+mp2rage_correction_app=mp2rage_correction_v0.0.3
+qsm_app=qsm_sstv_v0.1.1
+beast_app=beast_v0.0.2
+prepdwi_app=prepdwi_v0.0.12a_7T
+mriqc_app=mriqc_0.14.2
+
+job1=$(bidsBatch $opts $gradcorrect_app $bids_dir ${out_dir}/$gradcorrect_app participant)
+
+#run participant-level mriqc
+jobqc=$(bidsBatch $opts $mriqc_app $bids_dir ${out_dir}/$mriqc_app participant)
+
+#run group-level mriqc
+bidsBatch -d afterany:$jobqc $opts $mriqc_app $bids_dir ${out_dir}/$mriqc_app group
+
+#these submit a job when gradcorrect is done, which then runs bidsBatch (needed since bidsBatch requires the input dataset to be complete when the job is run)
+
+hasBIDS $bids_dir anat MP2RAGE && \
+hasBIDS $bids_dir fmap SA2RAGE && \
+       	regularSubmit -N run_$mp2rage_correction_app -j Quick -d afterany:$job1 bidsBatch $opts $mp2rage_correction_app  ${out_dir}/$gradcorrect_app ${out_dir}/$mp2rage_correction_app participant
+
+hasBIDS $bids_dir anat GRE && \
+	regularSubmit -N run_$qsm_app -j Quick -d afterany:$job1 bidsBatch $opts $qsm_app  ${out_dir}/$gradcorrect_app ${out_dir}/$qsm_app participant
+
+hasBIDS $bids_dir anat T1w && \
+	regularSubmit -N run_$beast_app -j Quick -d afterany:$job1 bidsBatch $opts $beast_app  ${out_dir}/$gradcorrect_app ${out_dir}/$beast_app participant
+
+
+#leave prepdwi out for now, since unable to monitor completion of beast_app dependency
+#regularSubmit -j Quick -d afterany:$job1 bidsBatch $opts $prepdwi_app  $bids_dir  ${out_dir}/$prepdwi_app participant --in_brainmask_dir ${out_dir}/$beast_app
+
+
+echo $job1
+
+exit 0
