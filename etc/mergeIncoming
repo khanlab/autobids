@@ -33,7 +33,13 @@ fi
 cp -v $incoming_bids/code/*/bids-validator.txt $incoming_log_dir
 cp -v $incoming_bids/code/*/subjects-list.txt $incoming_log_dir
 
-#now try to merge -- 
+#now use rsync to merge
+rsync -av --remove-source-files --ignore-existing $incoming_bids/* $main_bids/bids/
+
+#remove any empty folders from the incoming folder
+find $incoming_bids -type d -delete
+
+#need a function to re-generate participants.tsv file (need to ensure this is atomic)
 
 
-
+#any existing files in $incoming_bids can be stashed away perhaps..
