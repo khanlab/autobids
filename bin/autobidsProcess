@@ -172,6 +172,10 @@ fi
 
 fi
 
+if [ -n "$TAR_SUBJ_EXPR" ]
+then
+	SUBJ_EXPR_OPT="-T '${TAR_SUBJ_EXPR}'"
+else
 
 if [ ! -n "$SUBJ_EXPR" ]
 then
@@ -179,6 +183,9 @@ then
 	exit 1
 fi
 
+	SUBJ_EXPR_OPT="-P '${SUBJ_EXPR}'"
+
+fi
 #HEURISTIC optional - default is cfmm_bold_rest
 #if [ -n "$HEURISTIC" ]
 #then
@@ -231,11 +238,6 @@ INCOMING_ID=`date +%Y-%m-%d_%Hh%Mm.$RANDOM`
 INCOMING_BIDS_DIR=$BIDS_DIR/incoming_bids/$INCOMING_ID
 mkdir -p $INCOMING_BIDS_DIR
 
-MAIL_DIR=$BIDS_DIR/code/mail_out
-mkdir -p $MAIL_DIR
-
-MAIL_MSG=$MAIL_DIR/$INCOMING_ID.txt
-
 # 2. import into that folder
 mkdir -p $INCOMING_BIDS_DIR/code
 pushd $INCOMING_BIDS_DIR/code
@@ -244,12 +246,12 @@ pushd $INCOMING_BIDS_DIR/code
 # if run on SLURM, request number of cores based on number of scans to convert
 if [ $nscans -lt 16 ]
 then
-job_tar2bids=$(regularSubmit $opts -N tar2bids -j 8core32gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 8 -w \$SLURM_TMPDIR  -C $in_tar)
+job_tar2bids=$(regularSubmit $opts -N tar2bids -j 8core32gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR "'${SUBJ_EXPR_OPT}'" -h $HEURISTIC -N 8 -w \$SLURM_TMPDIR  -C $in_tar)
 elif [ $nscans -lt 32 ]
 then
-job_tar2bids=$(regularSubmit $opts -N tar2bids -j 16core64gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 16 -w \$SLURM_TMPDIR -C $in_tar)
+job_tar2bids=$(regularSubmit $opts -N tar2bids -j 16core64gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR "'${SUBJ_EXPR_OPT}'" -h $HEURISTIC -N 16 -w \$SLURM_TMPDIR -C $in_tar)
 else
-job_tar2bids=$(regularSubmit $opts -N tar2bids -j 32core128gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 32 -w \$SLURM_TMPDIR -C $in_tar)
+job_tar2bids=$(regularSubmit $opts -N tar2bids -j 32core128gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR "'${SUBJ_EXPR_OPT}'" -h $HEURISTIC -N 32 -w \$SLURM_TMPDIR -C $in_tar)
 fi
 
 errorcode=$?
