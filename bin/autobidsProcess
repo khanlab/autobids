@@ -246,12 +246,12 @@ pushd $INCOMING_BIDS_DIR/code
 # if run on SLURM, request number of cores based on number of scans to convert
 if [ $nscans -lt 16 ]
 then
-job_tar2bids=$(regularSubmit $opts -N tar2bids -j 8core32gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR "'${SUBJ_EXPR_OPT}'" -h $HEURISTIC -N 8 -w \$SLURM_TMPDIR  -C $in_tar)
+job_tar2bids=$(regularSubmit $opts -N tar2bids -j 8core32gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR ${SUBJ_EXPR_OPT} -h $HEURISTIC -N 8 -w \$SLURM_TMPDIR  -C $in_tar)
 elif [ $nscans -lt 32 ]
 then
-job_tar2bids=$(regularSubmit $opts -N tar2bids -j 16core64gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR "'${SUBJ_EXPR_OPT}'" -h $HEURISTIC -N 16 -w \$SLURM_TMPDIR -C $in_tar)
+job_tar2bids=$(regularSubmit $opts -N tar2bids -j 16core64gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR ${SUBJ_EXPR_OPT} -h $HEURISTIC -N 16 -w \$SLURM_TMPDIR -C $in_tar)
 else
-job_tar2bids=$(regularSubmit $opts -N tar2bids -j 32core128gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR "'${SUBJ_EXPR_OPT}'" -h $HEURISTIC -N 32 -w \$SLURM_TMPDIR -C $in_tar)
+job_tar2bids=$(regularSubmit $opts -N tar2bids -j 32core128gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR ${SUBJ_EXPR_OPT} -h $HEURISTIC -N 32 -w \$SLURM_TMPDIR -C $in_tar)
 fi
 
 errorcode=$?
