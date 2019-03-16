@@ -19,7 +19,8 @@ then
  email=$4
 fi
 
-incoming_log_dir=$main_bids/code/autobids_${incoming_id}
+incoming_id=${incoming_bids##*/}
+incoming_log_dir=$main_bids/bids/code/autobids_${incoming_id}
 mkdir -p $incoming_log_dir
 
 if [ "$sendmail" = 1 ]
