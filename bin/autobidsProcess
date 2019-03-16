@@ -264,23 +264,7 @@ fi
 # tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 8 -w $SLURM_TMPDIR -C  $in_tar
 sleep 2
 
-depjob=$job_tar2bids
-#use globus to sync to an endpoint after bids conversion (if GLOBUS_BIDS_ENDPOINT exists in study cfg)
-if [ -n "$EMAIL_NOTIFICATION" -a -n "$GLOBUS_BIDS_ENDPOINT" ]
-then
-	job_genmail=$(regularSubmit $opts -j Quick -d afterany:$job_tar2bids -N createmail "$AUTOBIDS_DIR/etc/genMailOutput $INCOMING_BIDS_DIR $GLOBUS_BIDS_ENDPOINT > $MAIL_MSG")
-
-
-	job_sendmail=$(regularSubmit $opts -j Quick -d afterok:$job_genmail -N sendmail $AUTOBIDS_DIR/etc/queueNetworkJob $AUTOBIDS_DIR/etc/sendMail $EMAIL_NOTIFICATION ${BIDS_DIR##*/} $MAIL_MSG )
-	sleep 2
-
-	depjob=$job_genmail
-fi
-
-# 3. submit merge job (to bring incoming bids into main folder) - returns non-zero if failed
-
-
-job_merge=$(regularSubmit $opts -j Quick -d afterok:$job_genmail $AUTOBIDS_DIR/etc/mergeBIDS $INCOMING_BIDS_DIR $BIDS_DIR )
+	job_merge=$(regularSubmit $opts -j Quick -d afterany:$job_tar2bids -N mergeIncoming $AUTOBIDS_DIR/etc/mergeIncoming $INCOMING_BIDS_DIR $BIDS_DIR $GLOBUS_BIDS_ENDPOINT $EMAIL_NOTIFICATION)
 
 # 4. submit post-proc job on the incoming bids dataset, outputting to the main folder
 
@@ -288,8 +272,10 @@ job_merge=$(regularSubmit $opts -j Quick -d afterok:$job_genmail $AUTOBIDS_DIR/e
 if [ -n "$POST_BIDS_PIPELINE" ]
 then
 
+INCOMING_SUBJLIST=$BIDS_DIR/bids/code/autobids_${INCOMING_ID}/subjects-list.txt
+
 #submit a job that will submit the post-bids-pipeline when bids is ready.. (since bidsBatch requires the participants.tsv to exist at submission time)
-job_postproc=$(regularSubmit $opts -j Quick -d afterany:$job_tar2bids $POST_BIDS_PIPELINE -o $INCOMING_BIDS_DIR )
+job_postproc=$(regularSubmit $opts -j Quick -d afterany:$job_merge $POST_BIDS_PIPELINE -S $INCOMING_SUBJLIST $BIDS_DIR/bids )
 sleep 2
 
 #notification for post-proc TBD (since currently unable to get jobid from job that is not yet submitted)

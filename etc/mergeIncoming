@@ -1,0 +1,38 @@
+#!/bin/bash
+
+if [ "$#" -lt 2 ]
+then
+echo "Usage: $0 <incoming bids dir> <BIDS_dir> [ optional: <endpoint UUID> <e-mail address> ] "
+exit 1
+fi
+
+
+incoming_bids=$1
+main_bids=$2
+
+sendmail=0
+
+if [ "$#" == 4 ]
+then
+ sendmail=1
+ endpoint=$3
+ email=$4
+fi
+
+incoming_log_dir=$main_bids/code/autobids_${incoming_id}
+mkdir -p $incoming_log_dir
+
+if [ "$sendmail" = 1 ]
+then
+ mail_txt=$incoming_log_dir/mail.txt
+ AUTOBIDS_DIR/etc/genMailOutput $incoming_bids $endpoint >  $mail_txt
+ AUTOBIDS_DIR/etc/queueNetworkJob $AUTOBIDS_DIR/etc/sendMail $email ${main_bids##*/} $mail_txt
+fi
+
+cp -v $incoming_bids/code/*/bids-validator.txt $incoming_log_dir
+cp -v $incoming_bids/code/*/subjects-list.txt $incoming_log_dir
+
+#now try to merge -- 
+
+
+
