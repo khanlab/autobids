@@ -25,8 +25,8 @@ mkdir -p $incoming_log_dir
 if [ "$sendmail" = 1 ]
 then
  mail_txt=$incoming_log_dir/mail.txt
- AUTOBIDS_DIR/etc/genMailOutput $incoming_bids $endpoint >  $mail_txt
- AUTOBIDS_DIR/etc/queueNetworkJob $AUTOBIDS_DIR/etc/sendMail $email ${main_bids##*/} $mail_txt
+ $AUTOBIDS_DIR/etc/genMailOutput $incoming_bids $endpoint >  $mail_txt
+ $AUTOBIDS_DIR/etc/queueNetworkJob $AUTOBIDS_DIR/etc/sendMail $email ${main_bids##*/} $mail_txt
 fi
 
 cp -v $incoming_bids/code/*/bids-validator.txt $incoming_log_dir
