@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ "$#" -lt 2 ]
+then
+
+echo "Usage: $0 <incoming bids> <main bids>"
+exit 1
+
+fi
+
+echo incoming: $1
+echo main $2
+
+exit 0
