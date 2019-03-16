@@ -35,11 +35,31 @@ cp -v $incoming_bids/code/*/subjects-list.txt $incoming_log_dir
 
 #now use rsync to merge
 rsync -av --remove-source-files --ignore-existing $incoming_bids/* $main_bids/bids/
+#rsync -av --exclude code --remove-source-files --ignore-existing $incoming_bids/* $main_bids/bids/
+
+
+#need a function to re-generate participants.tsv file (need to ensure this is atomic)
+#if exists in incoming, then main participants.tsv already existed:
+if [ -e $incoming_bids/participants.tsv ]
+then
+	$AUTOBIDS_DIR/etc/mergeParticipantsTSV $incoming_bids/participants.tsv $main_bids/bids/participants.tsv
+fi
+
+#move the contents of the code folder over now
+#rsync -av  --remove-source-files --ignore-existing $incoming_bids/code/* $incoming_log_dir/
+
+#remove remaining bids files we don't need to keep:
+rm -f $incoming_bids/{.bidsignore,CHANGES,dataset_description.json,participants.tsv,README} $incoming_bids/sourcedata/README
 
 #remove any empty folders from the incoming folder
 find $incoming_bids -type d -delete
 
-#need a function to re-generate participants.tsv file (need to ensure this is atomic)
+#any remaining files may be conflicts that we want to retain
+if [ -e $incoming_bids ]
+then
+	pushd $incoming_bids
+	tar -cvzf $incoming_log_dir/unimported_files.tgz .
+	popd
+fi
 
-
-#any existing files in $incoming_bids can be stashed away perhaps..
+#now, incoming bids folder should be ok to remove.. (leave it in scratch)

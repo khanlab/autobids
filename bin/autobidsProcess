@@ -233,14 +233,16 @@ BIDS_DIR=`realpath $BIDS_DIR`
 
 #now, we want to:
 
-# 1. make an incoming bids subfolder (uniquely named)
+# 1. make an incoming bids subfolder (uniquely named), and a merged log folder
 INCOMING_ID=`date +%Y-%m-%d_%Hh%Mm.$RANDOM`
-INCOMING_BIDS_DIR=$BIDS_DIR/incoming_bids/$INCOMING_ID
-mkdir -p $INCOMING_BIDS_DIR
+INCOMING_BIDS_DIR=/scratch/$USER/autobids_$INCOMING_ID 
+INCOMING_LOG_DIR=$BIDS_DIR/bids/code/autobids_${INCOMING_ID}
 
-# 2. import into that folder
-mkdir -p $INCOMING_BIDS_DIR/code
-pushd $INCOMING_BIDS_DIR/code
+mkdir -p $INCOMING_BIDS_DIR
+mkdir -p $INCOMING_LOG_DIR
+
+# 2. import into INCOMING_BIDS_DIR, but keep job files in INCOMING_LOG_DIR (so the job can clean up after itself)
+pushd $INCOMING_LOG_DIR
 
 #submit tar2bids job here
 # if run on SLURM, request number of cores based on number of scans to convert

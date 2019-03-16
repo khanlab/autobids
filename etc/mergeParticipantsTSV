@@ -1,0 +1,54 @@
+#!/bin/bash
+
+if [ "$#" -lt 2 ]
+then
+ echo "Merges subject_ids that do not exist into an existing participants tsv file (parallel-safe)"
+  echo "Usage: $0 <incoming tsv>  <file to merge new subjects into>"
+  exit 1
+fi
+
+incoming_tsv=$1
+main_tsv=$2
+
+	#for each subject, check to see if it already exists in main tsv
+	nlines=`cat $incoming_tsv | wc -l`
+	for line in `seq 2 $nlines`
+	do
+		s=`head -n $line $incoming_tsv | tail -n 1 | awk -F '\t' '{print $1}'`
+
+		#check for exact match of subject in main participants.tsv	
+		if cat $main_tsv | awk -F '\t' '{print $1}' | grep "^${s}$"
+		then
+			echo "$s already exists in main participants.tsv"
+		else
+			echo "adding $s to participants.tsv"
+
+			#use a lock to do ensure no synchronization issues
+			tsv_lock=${main_tsv}.lock
+			nretries=10
+			for i in `seq 1 $nretries`
+			do
+
+				if mkdir -p $tsv_lock
+				then
+					#add to tsv
+					head -n $line $incoming_tsv | tail -n 1 >> $main_tsv
+					rmdir $tsv_lock
+					lockstuck=0
+					break
+				else
+					echo "waiting for lock.."
+					lockstuck=1
+					sleep 5
+				fi
+			done
+			if [ "$lockstuck" = 1 ]
+			then
+				echo "failed to merge $incoming_tsv into $main_tsv, file is locked.."
+				echo " -- may need to unlock manually: rmdir $tsvlock"
+			fi
+		fi
+	done
+
+
+
