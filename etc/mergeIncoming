@@ -13,11 +13,11 @@ main_bids=$3
 
 sendmail=0
 
-if [ "$#" == 4 ]
+if [ "$#" == 5 ]
 then
  sendmail=1
- endpoint=$3
- email=$4
+ endpoint=$4
+ email=$5
 fi
 
 
