@@ -1,0 +1,24 @@
+#!/bin/bash
+if [ "$#" -lt 3 ]
+then
+
+echo "Usage: $0 <e-mail address> <project name> <txtfile message>"
+exit 1
+
+fi
+
+email=$1
+project=$2
+body=$3
+
+
+#deal with comma-separated e-mails
+for addr in $(echo $email  | sed "s/,/ /g")
+do
+echo "cat $body | mail -s "autobids-cfmm: ${project} import complete" $addr"
+cat $body | mail -s "autobids-cfmm: ${project} import complete" $addr
+echo "delay 30sec.."
+sleep 30 # to avoid sending mail too quickly..
+done
+
+

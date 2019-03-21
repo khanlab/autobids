@@ -172,6 +172,10 @@ fi
 
 fi
 
+if [ -n "$TAR_SUBJ_EXPR" ]
+then
+	SUBJ_EXPR_OPT="-T '${TAR_SUBJ_EXPR}'"
+else
 
 if [ ! -n "$SUBJ_EXPR" ]
 then
@@ -179,6 +183,9 @@ then
 	exit 1
 fi
 
+	SUBJ_EXPR_OPT="-P '${SUBJ_EXPR}'"
+
+fi
 #HEURISTIC optional - default is cfmm_bold_rest
 #if [ -n "$HEURISTIC" ]
 #then
@@ -219,22 +226,34 @@ echo "BIDS_DIR: $BIDS_DIR"
 echo ""
 
 
-
-mkdir -p $BIDS_DIR/code
+# Incremental additions to the BIDS_DIR;  assume BIDS_DIR is set to the folder that contains the bids/ subfolder
+#  for now, strip off the "/bids" from the end if it exists
+BIDS_DIR=${BIDS_DIR%/bids}
 BIDS_DIR=`realpath $BIDS_DIR`
 
-pushd $BIDS_DIR/code
+#now, we want to:
+
+# 1. make an incoming bids subfolder (uniquely named), and a merged log folder
+INCOMING_ID=`date +%Y-%m-%d_%Hh%Mm.$RANDOM`
+INCOMING_BIDS_DIR=/scratch/$USER/autobids_$INCOMING_ID 
+INCOMING_LOG_DIR=$BIDS_DIR/bids/code/autobids_${INCOMING_ID}
+
+mkdir -p $INCOMING_BIDS_DIR
+mkdir -p $INCOMING_LOG_DIR
+
+# 2. import into INCOMING_BIDS_DIR, but keep job files in INCOMING_LOG_DIR (so the job can clean up after itself)
+pushd $INCOMING_LOG_DIR
 
 #submit tar2bids job here
 # if run on SLURM, request number of cores based on number of scans to convert
 if [ $nscans -lt 16 ]
 then
-job_tar2bids=$(regularSubmit $opts -N tar2bids -j 8core32gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 8 -w \$SLURM_TMPDIR  -C $in_tar)
+job_tar2bids=$(regularSubmit $opts -N tar2bids -j 8core32gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR ${SUBJ_EXPR_OPT} -h $HEURISTIC -N 8 -w \$SLURM_TMPDIR  -C $in_tar)
 elif [ $nscans -lt 32 ]
 then
-job_tar2bids=$(regularSubmit $opts -N tar2bids -j 16core64gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 16 -w \$SLURM_TMPDIR -C $in_tar)
+job_tar2bids=$(regularSubmit $opts -N tar2bids -j 16core64gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR ${SUBJ_EXPR_OPT} -h $HEURISTIC -N 16 -w \$SLURM_TMPDIR -C $in_tar)
 else
-job_tar2bids=$(regularSubmit $opts -N tar2bids -j 32core128gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 32 -w \$SLURM_TMPDIR -C $in_tar)
+job_tar2bids=$(regularSubmit $opts -N tar2bids -j 32core128gb3h singularity run $SINGULARITY_OPTS -B /localscratch:/localscratch $TAR2BIDS_IMG -o $INCOMING_BIDS_DIR ${SUBJ_EXPR_OPT} -h $HEURISTIC -N 32 -w \$SLURM_TMPDIR -C $in_tar)
 fi
 
 errorcode=$?
@@ -249,30 +268,27 @@ fi
 # tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 8 -w $SLURM_TMPDIR -C  $in_tar
 sleep 2
 
+	job_merge=$(regularSubmit $opts -j Quick -d afterany:$job_tar2bids -N mergeIncoming $AUTOBIDS_DIR/etc/mergeIncoming $INCOMING_BIDS_DIR $INCOMING_LOG_DIR $BIDS_DIR $GLOBUS_BIDS_ENDPOINT $EMAIL_NOTIFICATION)
 
-#use globus to sync to an endpoint after bids conversion (if GLOBUS_BIDS_ENDPOINT exists in study cfg)
-if [ -n "$EMAIL_NOTIFICATION" -a -n "$GLOBUS_BIDS_ENDPOINT" ]
-then
-	regularSubmit $opts -j Quick -d afterany:$job_tar2bids -N mailnotify $AUTOBIDS_DIR/etc/queueNetworkJob $AUTOBIDS_DIR/etc/mailNotify $EMAIL_NOTIFICATION $BIDS_DIR $GLOBUS_BIDS_ENDPOINT 
-	sleep 2
-fi
-
-
+# 4. submit post-proc job on the incoming bids dataset, outputting to the main folder
 
 #postbids pipeline (to run on validated bids datasets) is optional:
 if [ -n "$POST_BIDS_PIPELINE" ]
 then
 
+INCOMING_SUBJLIST=$BIDS_DIR/bids/code/autobids_${INCOMING_ID}/subjects-list.txt
+
 #submit a job that will submit the post-bids-pipeline when bids is ready.. (since bidsBatch requires the participants.tsv to exist at submission time)
-job_postproc=$(regularSubmit $opts -j Quick -d afterany:$job_tar2bids $POST_BIDS_PIPELINE $BIDS_DIR )
+job_postproc=$(regularSubmit $opts -j Quick -d afterany:$job_merge $POST_BIDS_PIPELINE -S $INCOMING_SUBJLIST $BIDS_DIR/bids )
 sleep 2
 
 #notification for post-proc TBD (since currently unable to get jobid from job that is not yet submitted)
 
-
 fi
 
 popd
+
+#3. 
 
 
 exit 0
