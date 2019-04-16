@@ -1,0 +1,47 @@
+#!/bin/bash
+
+if [ "$#" -lt 5 ]
+then
+echo "Usage: $0 <bids> <out_folder> <in_seg_dir> <matching_seg> <seg_name> <bidsBatch opts...>"
+exit 1
+fi
+
+app_name=surfmorph_dev
+
+bids=$1
+out_folder=$2
+in_seg_dir=$3
+matching_seg=$4
+seg_name=$5
+
+shift 5
+
+bids_opts=$@
+
+#bids=./bids_clean
+#out_folder=./surfmorph_dev
+#in_seg_dir=~/cfmm-projects/MacDonald/VTASN_3T/derivatives/diffparc_3T_distcorr/
+#matching_seg=space-T1w_seed-CIT168striatum_targets-cortical_inseed
+#seg_name=striatum
+
+opts="--in_seg_dir ${in_seg_dir} --matching_seg ${matching_seg} --seg_name ${seg_name}"
+
+#initial job requires linear reg with gnu-parallel, use ShortFat
+# generates iter1 template
+jobg1=$(bidsBatch ${bids_opts} -j ShortFat ${app_name}  ${bids} ${out_folder} group1 $opts)
+
+# runs iter1 mappings
+jobp1=$(bidsBatch ${bids_opts} -d afterany:$jobg1 -j ShortSkinny ${app_name}  ${bids} ${out_folder} participant1 $opts)
+
+#generates iter2 template
+jobg1=$(bidsBatch ${bids_opts} -d afterany:$jobp1 -j ShortSkinny ${app_name}  ${bids} ${out_folder} group1 $opts)
+
+#runs iter2 mappings
+jobp1=$(bidsBatch ${bids_opts} -d afterany:$jobg1 -j ShortSkinny ${app_name}  ${bids} ${out_folder} participant1 $opts)
+
+#generates iter2 template
+jobg1=$(bidsBatch ${bids_opts} -d afterany:$jobp1 -j ShortSkinny ${app_name}  ${bids} ${out_folder} group1 $opts)
+
+#runs iter3 mappings
+jobp1=$(bidsBatch ${bids_opts} -d afterany:$jobg1 -j ShortSkinny ${app_name}  ${bids} ${out_folder} participant1 $opts)
+
