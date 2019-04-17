@@ -36,11 +36,11 @@ then
 	custom_PI=$3
 fi
 
-#if [ "$cred_id" = "bd" ]
-#then
+if [ "$cred_id" = "bd" ]
+then
 	#this is a bidsdump projectfile, so make it unreadable to all except current user
-#	umask -S go-rwx
-#fi
+	umask -S o-rwx
+fi
 
 mkdir -p $RETRIEVE_LOG_DIR
 LOG=$RETRIEVE_LOG_DIR/`date +%Y-%m-%d`.txt
