@@ -32,8 +32,8 @@ cp -v $incoming_bids/code/*/bids-validator.txt $incoming_log_dir
 cp -v $incoming_bids/code/*/subjects-list.txt $incoming_log_dir
 
 #now use rsync to merge -- merge everything but code dir into main bids, and move contents of code dir into the incoming log dir
-rsync -av --exclude code --remove-source-files --ignore-existing $incoming_bids/ $main_bids/bids/
-rsync -av  --remove-source-files --ignore-existing $incoming_bids/code/* $incoming_log_dir/
+rsync -av --chmod=Dg+s,g+rwX,o-rwX --chown=$USER:$CC_COMPUTE_ALLOC --exclude code --remove-source-files --ignore-existing $incoming_bids/ $main_bids/bids/
+rsync -av --chmod=Dg+s,g+rwX,o-rwX --chown=$USER:$CC_COMPUTE_ALLOC --remove-source-files --ignore-existing $incoming_bids/code/* $incoming_log_dir/
 
 #need a function to re-generate participants.tsv file (need to ensure this is atomic)
 #if exists in incoming, then main participants.tsv already existed:
@@ -44,7 +44,7 @@ fi
 
 
 #remove remaining bids files we don't need to keep:
-rm -f $incoming_bids/{.bidsignore,CHANGES,dataset_description.json,participants.tsv,README} $incoming_bids/sourcedata/README
+rm -f $incoming_bids/{.bidsignore,CHANGES,dataset_description.json,participants.tsv,README} $incoming_bids/task*.json $incoming_bids/sourcedata/README $incoming_bids/sourcedata/*.tar
 
 #remove any empty folders from the incoming folder
 find $incoming_bids -type d -delete
