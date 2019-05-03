@@ -10,6 +10,8 @@ fi
 incoming_tsv=$1
 main_tsv=$2
 
+	
+
 	#for each subject, check to see if it already exists in main tsv
 	nlines=`cat $incoming_tsv | wc -l`
 	for line in `seq 2 $nlines`
@@ -33,6 +35,15 @@ main_tsv=$2
 				then
 					#add to tsv
 					head -n $line $incoming_tsv | tail -n 1 >> $main_tsv
+
+					#check to see if header line exists:
+					header=`head -n 1 $main_tsv`
+					if [ ! "${header:0:14}" = "participant_id" ]
+					then
+						#header line doesn't exist, add it..
+						echo 'participant_id' | cat - $main_tsv > ${main_tsv}.temp && mv ${main_tsv}.temp ${main_tsv}
+					fi
+
 					rmdir $tsv_lock
 					lockstuck=0
 					break
