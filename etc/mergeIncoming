@@ -32,8 +32,8 @@ cp -v $incoming_bids/code/*/bids-validator.txt $incoming_log_dir
 cp -v $incoming_bids/code/*/subjects-list.txt $incoming_log_dir
 
 #now use rsync to merge -- merge everything but code dir into main bids, and move contents of code dir into the incoming log dir
-rsync -av --chmod=Dg+s,g+rwX,o-rwX --chown=$USER:$CC_COMPUTE_ALLOC --exclude code --remove-source-files --ignore-existing $incoming_bids/ $main_bids/bids/
-rsync -av --chmod=Dg+s,g+rwX,o-rwX --chown=$USER:$CC_COMPUTE_ALLOC --remove-source-files --ignore-existing $incoming_bids/code/* $incoming_log_dir/
+rsync -av --chmod=Dg+s,g+rwX,o-rwX --chown=$USER:$CC_STORAGE_ALLOC --exclude code --remove-source-files --ignore-existing $incoming_bids/ $main_bids/bids/
+rsync -av --chmod=Dg+s,g+rwX,o-rwX --chown=$USER:$CC_STORAGE_ALLOC --remove-source-files --ignore-existing $incoming_bids/code/* $incoming_log_dir/
 
 #need a function to re-generate participants.tsv file (need to ensure this is atomic)
 #if exists in incoming, then main participants.tsv already existed:
