@@ -268,7 +268,7 @@ fi
 # tar2bids -o $BIDS_DIR -P "'${SUBJ_EXPR}'" -h $HEURISTIC -N 8 -w $SLURM_TMPDIR -C  $in_tar
 sleep 2
 
-	job_merge=$(regularSubmit $opts -j Quick -d afterany:$job_tar2bids -N mergeIncoming $AUTOBIDS_DIR/etc/mergeIncoming $INCOMING_BIDS_DIR $INCOMING_LOG_DIR $BIDS_DIR $GLOBUS_BIDS_ENDPOINT $EMAIL_NOTIFICATION)
+	job_merge=$(regularSubmit $opts -j ShortSkinny -d afterany:$job_tar2bids -N mergeIncoming -E $study_cfg $AUTOBIDS_DIR/etc/mergeIncoming $INCOMING_BIDS_DIR $INCOMING_LOG_DIR $BIDS_DIR $GLOBUS_BIDS_ENDPOINT $EMAIL_NOTIFICATION)
 
 # 4. submit post-proc job on the incoming bids dataset, outputting to the main folder
 
