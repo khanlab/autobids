@@ -17,7 +17,19 @@ then
   exit -1
 fi
 
-compgen -G ${bids}/sub-*/${datatype}/*${filetype}.nii* ${bids}/sub-*/ses-*/${datatype}/*${filetype}.nii* > /dev/null
+compgen -G ${bids}/sub-*/${datatype}/*${filetype}.nii*  > /dev/null
+retval1=$?
+compgen -G ${bids}/sub-*/ses-*/${datatype}/*${filetype}.nii* > /dev/null
+retval2=$?
+
+#return logical OR
+
+if [ "$retval1" = 0 -o "$retval2" = 0 ]
+then
+	exit 0
+else
+	exit 1
+fi
 
 
 
