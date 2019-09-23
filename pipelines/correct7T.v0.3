@@ -73,6 +73,8 @@ shift 1
 opts="$opts $@"
 
 
+#make abs path:
+bids_dir=`realpath $bids_dir`
 
 if [ "$process_mode" = "recent" ]
 then
