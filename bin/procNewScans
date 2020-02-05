@@ -75,7 +75,17 @@ do
   tar_name=${tar##*/}
   uid_file=${tar%%.tar}.uid
   uid=`cat $uid_file`
- 
+
+  stripped=${tar%.tar}
+  stripped=${stripped##*.}
+
+  if [ "$stripped" = "attached" ]
+  then
+	  echo "  Skipping attachment dicom $tar"
+	continue
+  fi
+
+
   PI=${tar_name%%_*}
   mkdir -p $INCOMING_TAR_DIR/$PI
 

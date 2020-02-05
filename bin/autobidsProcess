@@ -2,7 +2,7 @@
 
 
 #this can be overriden in study_cfg files
-TAR2BIDS_IMG=`shub-cache docker://khanlab/tar2bids:v0.0.3d`
+TAR2BIDS_IMG=docker://khanlab/tar2bids:latest
 
 function usage {
 	echo "Runs dcm2bids, pre-bids, and post-bids pipelines on tar files(s)"
@@ -92,6 +92,14 @@ else
 
 fi
 
+#check if this is an attached data data (attached.tar)
+stripped=${in_tar%.tar}
+stripped=${stripped##*.}
+if [ "$stripped" = "attached" ]
+then
+	echo "ERROR in $0: tarfile is only attached data, skipping"
+	exit 1
+fi
 
 #parse tarfile to get study config name
 study_cfg=`$AUTOBIDS_DIR/etc/getStudyCfg $in_tar`
