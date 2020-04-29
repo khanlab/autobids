@@ -17,6 +17,9 @@ function usage {
   echo "  -s <subjid>: run on single subject"
   echo "  -S <subjlist_txt>: run on subject list"
   echo "  -t : test mode (don't submit jobs)"
+  echo "  -g <grad_coeff_file>: run gradient correction with custom coefficient file"
+  echo "  -m <custom_mp2rage_param_csv>: run mp2rage correction with custom mp2rage_param file"
+  echo "  -n <custom_sa2rage_param_csv>: run mp2rage correction with custom sa2rage_param file"
 
   echo ""
 
@@ -43,8 +46,11 @@ process_mode=recent
 
 s_opts=""
 opts=""
+grad_coeff=""
+mp2rage_param_csv=""
+sa2rage_param_csv=""
 
-while getopts "ato:s:S:" options; do
+while getopts "ato:s:S:g:n:m" options; do
  case $options in
     a ) echo "	Running on all subjects" >&2
 	process_mode=all;;
@@ -59,6 +65,12 @@ while getopts "ato:s:S:" options; do
     t ) echo "  Using test mode, not submitting any jobs.." >&2
 	 s_opts="$sopts -t"
 	 opts="$opts -t";;
+    g ) echo "	Running gradient correction with custrom coefficient file: $OPTARG" >&2
+	grad_coeff=$OPTARG;;
+    n ) echo "	Running MP2RAGE correction with custom sa2rage parameter csv: $OPTARG" >&2
+    	sa2rage_param_csv=$OPTARG;;
+    m ) echo "	Running MP2RAGE correction with custom mp2rage parameter csv: $OPTARG" >&2
+	mp2rage_param_csv=$OPTARG;;
     * ) usage
 	exit 1;;
  esac
@@ -113,7 +125,7 @@ mkdir -p $out_dir
 bids_dir=`realpath $bids_dir`
 out_dir=`realpath $out_dir`
 
-gradcorrect_app=gradcorrect_v0.0.3
+gradcorrect_app=gradcorrect_v0.0.3a
 mp2rage_correction_app=mp2rage_correction_v0.0.4a
 qsm_app=qsm_sstv_v0.1.1
 beast_app=beast_v0.0.2
@@ -121,7 +133,13 @@ prepdwi_app=prepdwi_v0.0.12c_7T
 fmriprep_app=fmriprep_1.5.0
 mriqc_app=mriqc_0.15.1
 
-job1=$(bidsBatch $opts $gradcorrect_app $bids_dir ${out_dir}/$gradcorrect_app participant)
+#checks if custom grad_coeff exists and runs gradient correction
+if [ -e $grad_coeff ]
+then
+	job1=$(bidsBatch $opts $gradcorrect_app $bids_dir ${out_dir}/$gradcorrect_app participant --grad_coeff_file ${grad_coeff})	
+else
+	job1=$(bidsBatch $opts $gradcorrect_app $bids_dir ${out_dir}/$gradcorrect_app participant)
+fi
 
 #run participant-level mriqc
 jobqc=$(bidsBatch $opts $mriqc_app $bids_dir ${out_dir}/$mriqc_app participant)
@@ -135,7 +153,23 @@ bidsBatch -d afterany:$jobqc $opts $mriqc_app $bids_dir ${out_dir}/$mriqc_app gr
 hasBIDS $bids_dir anat MP2RAGE && \
 hasBIDS $bids_dir fmap SA2RAGE && \
 	mkdir -p ${out_dir}/$mp2rage_correction_app/code && pushd ${out_dir}/$mp2rage_correction_app/code && \
-       	regularSubmit -N run_$mp2rage_correction_app -j Quick -d afterany:$job1 $s_opts bidsBatch $opts $mp2rage_correction_app  ${out_dir}/$gradcorrect_app ${out_dir}/$mp2rage_correction_app participant && popd
+
+#checks if there are custom mp2rage_param_csv files and runs appropriate command
+if [[ -e $mp2rage_param_csv ]] || [[ -e $sa2rage_param_csv ]]
+then 
+	regularSubmit -N run_$mp2rage_correction_app -j Quick -d afterany:$job1 $s_opts bidsBatch $opts $mp2rage_correction_app  ${out_dir}/$gradcorrect_app ${out_dir}/$mp2rage_correction_app participant --mp2rage_param_csv ${mp2rage_param_csv} --sa2rage_param_csv ${sa2rage_param_csv} && popd	
+	
+elif [[ -e $mp2rage_param_csv ]] || [[ ! -e $sa2rage_param_csv ]]
+then
+	regularSubmit -N run_$mp2rage_correction_app -j Quick -d afterany:$job1 $s_opts bidsBatch $opts $mp2rage_correction_app  ${out_dir}/$gradcorrect_app ${out_dir}/$mp2rage_correction_app participant --mp2rage_param_csv ${mp2rage_param_csv} && popd
+	
+elif [[ ! -e $mp2rage_param_csv ]] || [[ -e $sa2rage_param_csv ]]
+then
+	regularSubmit -N run_$mp2rage_correction_app -j Quick -d afterany:$job1 $s_opts bidsBatch $opts $mp2rage_correction_app  ${out_dir}/$gradcorrect_app ${out_dir}/$mp2rage_correction_app participant --sa2rage_param_csv ${sa2rage_param_csv} && popd
+
+else
+	regularSubmit -N run_$mp2rage_correction_app -j Quick -d afterany:$job1 $s_opts bidsBatch $opts $mp2rage_correction_app  ${out_dir}/$gradcorrect_app ${out_dir}/$mp2rage_correction_app participant && popd	
+fi
 
 hasBIDS $bids_dir anat GRE && \
 	mkdir -p ${out_dir}/$qsm_app/code && pushd ${out_dir}/$qsm_app/code && \
