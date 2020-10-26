@@ -254,7 +254,7 @@ mkdir -p $INCOMING_LOG_DIR
 
 
 #if renamer enabled, then copy tarfiles to INCOMING_BIDS_DIR with new names
-if [ -n $RENAMER_PARSE_PATIENTNAME -a -n $RENAMER_FORMAT_STRING ]
+if [ -n "$RENAMER_PARSE_PATIENTNAME" -a -n "$RENAMER_FORMAT_STRING" ]
 then
   renamer_opts="--in_parse $RENAMER_PARSE_PATIENTNAME --out_reformat $RENAMER_FORMAT_STRING"
   if [ -n "$RENAMER_DEFAULT_SESSION" ]
