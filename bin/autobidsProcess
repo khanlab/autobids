@@ -4,7 +4,7 @@ execpath=`dirname $0`
 execpath=`realpath $execpath`
 
 #this can be overriden in study_cfg files
-TAR2BIDS_IMG=docker://khanlab/tar2bids:latest
+TAR2BIDS_IMG=`shub-cache docker://khanlab/tar2bids:latest`
 
 function usage {
 	echo "Runs dcm2bids, pre-bids, and post-bids pipelines on tar files(s)"
