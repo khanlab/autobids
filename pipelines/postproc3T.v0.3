@@ -1,0 +1,138 @@
+#!/bin/bash
+
+
+
+#pipeline for running gradient correction & sa2rage+mp2rage B1 correction
+
+function usage {
+
+  echo "autobids script for running standard post-proc and QC pipelines for 3T. Puts results in <bids_dir>/../$scriptname " 
+  echo " By default: will only process subjects that were most recently imported by autobids"
+  echo "" 
+  echo "Usage: $0 [ [-a] [-t] [-o OUT_DIR] [-s SUBJID] [-S SUBJLIST]  ]  BIDS_DIR  [ <bidsBatch options> ...] "
+  echo ""
+  echo " optional flags (place these *before* bids_dir):"
+  echo "  -a:  process all subjects, not just most recently imported (note: this will not re-run existing results, remove files first to do that)"
+  echo "  -o <out_dir>:  override output folder"
+  echo "  -s <subjid>: run on single subject"
+  echo "  -S <subjlist_txt>: run on subject list"
+  echo "  -t : test mode (don't submit jobs)"
+
+  echo ""
+
+
+}
+
+
+scriptname=$0
+scriptname=${scriptname##*/}
+
+
+
+
+if [ "$#" -lt 1 ]
+then
+  usage
+  exit 1
+fi
+
+out_dir=
+
+process_mode=recent
+# other options: all, subj, subjlist
+
+s_opts=""
+opts=""
+
+while getopts "ato:s:S:" options; do
+ case $options in
+    a ) echo "	Running on all subjects" >&2
+	process_mode=all;;
+    o ) echo "	Overriding output dir as: $OPTARG"  >&2
+	out_dir=$OPTARG;;
+    s ) echo "  Running on single subject: $OPTARG" >&2
+	process_mode=subj
+    	opts="$opts -s $OPTARG";;
+    S ) echo "  Running on a subject list: $OPTARG" >&2
+	 process_mode=subjlist
+   	 opts="$opts -S $OPTARG";;
+    t ) echo "  Using test mode, not submitting any jobs.." >&2
+	 s_opts="$sopts -t"
+	 opts="$opts -t";;
+    * ) usage
+	exit 1;;
+ esac
+done
+
+shift $((OPTIND-1))
+
+
+
+bids_dir=$1  		#path to bids dir
+shift 1 
+opts="$opts $@"
+
+
+
+if [ "$process_mode" = "recent" ]
+then
+
+#by default, only run on the most recently submitted subjects
+subjlist=`ls -1t $bids_dir/code/*/subjects-list.txt 2> /dev/null | head -n 1`
+if [ -n "$subjlist" ]
+then
+
+if [ -e $subjlist ]
+then
+	nsubj=`cat $subjlist | wc -l`
+	if [ "$nsubj" = "1" ]
+	then
+		subjid=`cat $subjlist`
+		opts="$opts -s $subjid"
+	else
+		opts="$opts -S $subjlist"
+	fi
+fi
+
+else
+	echo "No subjects-list.txt found in $bids_dir/code/* folder, running on ALL subjects"
+fi
+fi
+
+
+if [ ! -n "$out_dir" ]
+then
+	out_dir=$bids_dir/../$scriptname
+	echo "Using default output directory: $out_dir"
+fi	
+
+mkdir -p $out_dir
+
+bids_dir=`realpath $bids_dir`
+out_dir=`realpath $out_dir`
+
+#qsm_app=qsm_sstv_v0.1.1
+#prepdwi_app=prepdwi_v0.0.12b
+
+mriqc_app=mriqc_0.15.1
+fmriprep_app=fmriprep_20.2.1
+
+
+#run participant-level mriqc
+jobqc=$(bidsBatch $opts $mriqc_app $bids_dir ${out_dir}/$mriqc_app participant)
+
+#run group-level mriqc
+bidsBatch -d afterany:$jobqc $opts $mriqc_app $bids_dir ${out_dir}/$mriqc_app group
+
+hasBIDS $bids_dir anat T1w && \
+jobfmriprep=$(bidsBatch $opts $fmriprep_app $bids_dir ${out_dir}/$fmriprep_app participant)
+
+#hasBIDS $bids_dir dwi dwi && \
+#jobprepdwi=$(bidsBatch $opts $prepdwi_app $bids_dir ${out_dir}/$prepdwi_app participant)
+
+#hasBIDS $bids_dir anat GRE && \
+#jobqsm=$(bidsBatch $opts $qsm_app $bids_dir ${out_dir}/$qsm_app participant)
+
+
+
+exit 0
