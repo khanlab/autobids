@@ -120,7 +120,7 @@ beast_app=beast_v0.0.2
 prepdwi_app=prepdwi_v0.0.12a_7T
 mriqc_app=mriqc_0.14.2
 
-job1=$(bidsBatch $opts $gradcorrect_app $bids_dir ${out_dir}/$gradcorrect_app participant)
+job1=$(bidsBatch -j 4core16gb24h $opts $gradcorrect_app $bids_dir ${out_dir}/$gradcorrect_app participant)
 
 #run participant-level mriqc
 jobqc=$(bidsBatch $opts $mriqc_app $bids_dir ${out_dir}/$mriqc_app participant)
