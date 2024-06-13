@@ -1,3 +1,5 @@
+###  Note: This version of autobids has been superceded by autobids-v2 -- If you are a Western CFMM user, please enroll your study at: https://autobids-uwo.ca
+
 # autobids
 
 ## Description
